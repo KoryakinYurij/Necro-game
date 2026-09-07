@@ -17,3 +17,6 @@ output/
 review_payload.b64
 __pycache__/
 *.pyc
+
+# Historical project snapshots (full copies of older states)
+Old versions/
