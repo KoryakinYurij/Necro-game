@@ -9,7 +9,7 @@ On the VPS used for this project, that root is `/home/fixedius/.agents/skills/`.
 Each skill lives at `<global-skills-root>/<skill-name>/SKILL.md`.
 When the correct workflow is unclear, read `ask-matt/SKILL.md` under that root before proposing the next step.
 
-Treat skill files as process source of truth. This file routes to them; it does not duplicate them.
+Treat skill files as process source of truth. This file routes to them; it does not duplicate or override them.
 
 ## Read before changing the project
 
@@ -37,6 +37,21 @@ Before planning or implementation, read:
 
 Do not send tickets produced by `/to-tickets` through `/triage`; they are already agent-ready.
 
+## Human decision-support policy
+
+The project owner can judge direction, feel, theme, priorities, and concrete mechanic options, but should not be expected to invent game systems or supply engineering facts from scratch.
+
+When a skill requires user decisions, preserve that requirement. Reduce the burden of each decision instead of silently making it for the user:
+
+- Research facts yourself first: inspect the repo, existing docs/ADRs/issues, and use external research when comparable games, design patterns, or technical evidence would materially improve the choice.
+- Never ask the user for information the agent can discover from code, tools, documentation, tests, or public primary sources.
+- Turn broad design questions into concrete choices. Prefer 2–4 viable options with short trade-offs rather than an open-ended “what do you want?”.
+- Make answers easy: the user should usually be able to reply with `A`, `B`, `C`, or `use your recommendation`, plus any small adjustment.
+- Give a recommended option and explain why it best fits Necro's current goals and constraints.
+- Use concrete gameplay examples or references so the user can react to something tangible.
+- Separate facts from taste: resolve facts autonomously; ask the user only where preference, product direction, or a hard-to-reverse trade-off genuinely remains.
+- If the active skill requires a HITL decision (for example `/grilling` or a Wayfinder grilling ticket), still ask and wait for the user's choice; this project policy changes the quality of the question, not the skill's ownership of the decision.
+
 ## How to guide the human developer
 
 The project owner is learning software/game development while building this project. The agent owns process navigation.
@@ -44,7 +59,6 @@ The project owner is learning software/game development while building this proj
 - State the current phase and the next concrete decision/action in plain language.
 - Recommend the appropriate skill when the phase changes; do not require the user to remember the skill graph.
 - Explain important architecture/design choices briefly before asking for a human judgement.
-- Ask the human for product taste, priorities, or irreversible trade-offs; investigate code facts and routine engineering facts yourself.
 - Keep scope narrow: one decision ticket or one implementation ticket at a time unless the active skill explicitly calls for mapping a wider effort.
 - Never silently expand a ticket because `GAME_REVIEW.md` contains adjacent ideas.
 - Surface blockers early. If work is blocked by an unresolved Wayfinder decision, route to that decision instead of inventing an assumption.
