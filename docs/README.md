@@ -20,6 +20,15 @@ Specs are GitHub issues. A spec describes one bounded feature or milestone and i
 
 Implementation tickets are GitHub issues created from an approved spec as dependency-ordered tracer bullets. Agents should implement one ticket in a fresh context rather than loading the entire review.
 
+## Reviews of the core-transition direction
+
+Four review documents cover the arena→exploration pivot (they converge; do not start new independent audits):
+
+- `REVIEW-exploration-pivot.md` — product verdict and gap list G1–G9.
+- `review-exploration-kernel-2026-09-08.md` — core seam map S1–S5.
+- `REVIEW-exploration-gaps-deepdive.md` — executable mechanisms and test cases for the same seams.
+- `REVIEW-synthesis-2026-09-08.md` — synthesis, verified test-harness status, and the consolidated action order.
+
 ## Open strategic decisions
 
 Large unresolved questions that need multiple sessions belong to a Wayfinder map and its decision tickets. When the map is clear, its decisions are collapsed into a new spec with `/to-spec` before implementation tickets are created.

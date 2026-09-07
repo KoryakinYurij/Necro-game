@@ -68,7 +68,7 @@ The project owner is learning software/game development while building this proj
 
 The current exploration pivot is deliberately split into two tracks:
 
-- GitHub spec **#1** and implementation tickets **#2–#9** prove the Exploration Thin Slice.
+- GitHub spec **#1** and implementation tickets **#2–#8** prove the Exploration Thin Slice; ticket **#9** is the human GO/ITERATE/STOP gate.
 - Wayfinder map **#10** and its decision tickets define post-thin-slice product architecture.
 
 Respect GitHub blocking edges. Post-thin-slice decisions must not be treated as implementation requirements before their blockers are resolved.
