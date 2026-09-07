@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+tests/node_modules/
+
+# Generated test/browser output
+output/
+
+# Transfer artifacts
+.incoming-*.tar.gz
+.missing_payload.b64
+.review_payload.b64
+.necro_deluxe_payload.b64
+
+# Local noise
+*.log
+.DS_Store
+review_payload.b64
+__pycache__/
+*.pyc

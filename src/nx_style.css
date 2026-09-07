@@ -1,0 +1,313 @@
+/* ============ NECRO v2 · ART & UX PASS ============ */
+html, body { -webkit-font-smoothing: antialiased; }
+
+/* плёночное зерно */
+#grainfx {
+  position: fixed; top: -20%; left: -20%; width: 140%; height: 140%;
+  z-index: 3; pointer-events: none; opacity: .05; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: nxGrain .8s steps(4) infinite;
+}
+@keyframes nxGrain {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-2%,1.5%); }
+  50% { transform: translate(1.5%,-2%); }
+  75% { transform: translate(-1.5%,-1%); }
+  100% { transform: translate(0,0); }
+}
+
+/* панели: камень вместо пластика */
+.panel {
+  background: linear-gradient(168deg, #1a1128 0%, #130c20 55%, #0d0815 100%);
+  border: 1px solid #5a4780;
+  box-shadow: 0 0 0 1px #000, 0 26px 60px #000e,
+    inset 0 1px 0 #ffffff14, inset 0 -22px 48px #00000059;
+}
+.panel:before { border-color: #c8a94e2b; }
+.panel:after, .card:after, .spec-card:after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .28; mix-blend-mode: soft-light;
+}
+h1.title { text-shadow: 0 0 26px #c8a94e3d, 0 2px 0 #000, 0 4px 10px #000; }
+.sub { color: #c65a6e; }
+.chip { border-color: #4a3a68; background: #100a1c; }
+.bestline { color: #eec95f; }
+
+/* кнопки: свечное золото вместо неонового глянца */
+.btn {
+  background: linear-gradient(#eec95f, #b3872c); border-color: #f7e7b2; color: #241a04;
+  box-shadow: 0 0 0 2px #000, 0 5px #6e5215, 0 10px 22px #00000080;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 0 0 2px #000, 0 7px #6e5215, 0 14px 28px #c8a94e30; }
+.btn:active { transform: translateY(2px); box-shadow: 0 0 0 2px #000, 0 2px #6e5215; }
+.btn.ghost {
+  color: #d9cfec; background: linear-gradient(#251a3a, #150f22); border-color: #4a3a68;
+  box-shadow: 0 0 0 2px #000, 0 5px #0b0714;
+}
+.btn.ghost:hover { box-shadow: 0 0 0 2px #000, 0 7px #0b0714, 0 0 18px #c8a94e26; }
+.btn.reroll { background: linear-gradient(#4b4ab0, #33318c); border-color: #9b9aff; box-shadow: 0 0 0 2px #000, 0 4px #1c1b55; }
+
+/* карты даров */
+.card { border-width: 1px; box-shadow: 0 0 0 1px #000, 0 10px 26px #000c, inset 0 1px 0 #ffffff14; }
+.card:hover { box-shadow: 0 0 0 1px #000, 0 0 24px -4px var(--ac), 0 16px 34px #000e; }
+.card.evo { border-width: 2px; }
+.spec-card { box-shadow: 0 0 0 1px #000, 0 8px 22px #000b; }
+.spec-card:hover { box-shadow: 0 0 0 1px #000, 0 0 22px -2px var(--sc), 0 12px 28px #000d; }
+
+/* иконки навыков и мелкие элементы */
+.icobtn { background: #120c1e; }
+.icobtn:hover { border-color: var(--c-gold); color: var(--c-gold); }
+.sk { border: 1px solid #43355f; box-shadow: 0 0 0 1px #05030a, inset 0 2px 8px #00000080, 0 2px 8px #0009; }
+.sk.evo { box-shadow: 0 0 0 1px #05030a, 0 0 12px #ffd23f59, inset 0 0 10px #ffd23f1f; }
+.ll { -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); box-shadow: 0 2px 10px #00000080, inset 0 1px 0 #ffffff0d; }
+#legionStatus { top: 120px; }
+#hint { font-size: 10px; letter-spacing: 2px; }
+.evo-star { color: #eec95f; }
+
+/* ---------- HUD РИТУАЛОВ ---------- */
+#spellHud {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 5; display: none; align-items: flex-end; gap: 8px; pointer-events: auto;
+}
+#spellHud .ashTag {
+  background: #0d0916e6; border: 1px solid #4a3a68; color: #8dff57;
+  padding: 7px 9px; border-radius: 5px; font: 700 11px Rubik, sans-serif;
+  box-shadow: 0 4px 10px #000a;
+}
+#spellHud .ashTag b { color: #b7ffb0; }
+.spell-slot {
+  position: relative; width: 52px; height: 52px;
+  background: linear-gradient(#171022, #0d0916); border: 1px solid #4a3a68; border-radius: 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 0 0 1px #000, 0 4px 10px #000a;
+  transition: transform .1s, border-color .15s; overflow: hidden;
+}
+.spell-slot:hover { transform: translateY(-2px); border-color: #c8a94e; }
+.spell-slot.locked { opacity: .38; cursor: not-allowed; }
+.spell-slot .sp-key { position: absolute; top: 2px; left: 5px; font: 700 8px Rubik, sans-serif; color: #9b8ea9; }
+.spell-slot .sp-ico { font-size: 17px; color: #e8dcc0; text-shadow: 0 0 6px #000; }
+.spell-slot .sp-cost { font: 600 9px Rubik, sans-serif; color: #8dff57; margin-top: 1px; }
+.spell-slot .sp-cd {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+  background: #000000b3; pointer-events: none;
+}
+
+/* ---------- КУЗНЯ ДУШ ---------- */
+#soulForge {
+  margin: 18px auto 0; padding: 12px 14px; max-width: 620px;
+  background: #120c1e; border: 1px solid #4a3a68; border-radius: 8px;
+  box-shadow: inset 0 1px 0 #ffffff0d, 0 6px 18px #0008;
+}
+.forge-title {
+  color: #c8a94e; font: 700 11px Rubik, sans-serif; letter-spacing: .18em; text-align: center;
+}
+.forge-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+.forge-btn {
+  cursor: pointer; color: #e8dcc0; background: #21152e; border: 1px solid #65428d;
+  border-radius: 5px; padding: 9px 12px; font-size: 11.5px;
+  transition: border-color .15s, color .15s, transform .1s;
+}
+.forge-btn:hover { border-color: #ffd23f; color: #ffd23f; transform: translateY(-1px); }
+.forge-btn:active { transform: translateY(1px); }
+
+/* ---------- итоги забега и тосты ---------- */
+.nx-summary { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 12px; }
+.nxchip {
+  background: #0c0716; border: 1px solid; border-radius: 3px;
+  padding: 3px 9px; font-size: 11px; font-weight: 700;
+}
+.nx-toast {
+  position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom));
+  transform: translateX(-50%); z-index: 12;
+  background: #0d0916ee; border: 1px solid #c8a94e66; padding: 8px 16px; border-radius: 6px;
+  font: 700 12px Rubik, sans-serif; letter-spacing: .06em; text-shadow: 1px 1px #000;
+  box-shadow: 0 6px 20px #000c; transition: opacity .5s, transform .5s;
+}
+.nx-toast.out { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+
+@media (max-width: 820px) {
+  .spell-slot { width: 46px; height: 46px; }
+  #spellHud { bottom: calc(10px + env(safe-area-inset-bottom)); }
+  #legionStatus { top: 108px; }
+}
+
+/* ============ UI-PASS 2 ============ */
+/* медальоны иконок на картах и в HUD */
+.cicon {
+  background: radial-gradient(circle at 50% 32%, #241740, #0a0612 78%);
+  box-shadow: inset 0 0 16px #000e, 0 0 0 1px #000, 0 3px 12px #000a;
+}
+.cicon:after {
+  content: ""; position: absolute; inset: 3px; border-radius: 5px;
+  border: 1px solid rgba(200,169,78,0.18); pointer-events: none;
+}
+.cicon { position: relative; }
+
+/* лёгкий шиммер заголовков */
+h1.title { animation: nxTitle 7s ease-in-out infinite; }
+@keyframes nxTitle {
+  0%, 100% { text-shadow: 0 0 22px #c8a94e30, 0 2px 0 #000, 0 4px 10px #000; }
+  50% { text-shadow: 0 0 36px #c8a94e59, 0 2px 0 #000, 0 4px 12px #000; }
+}
+
+/* декоративный разделитель под подзаголовком меню */
+.sub:after {
+  content: ""; display: block; width: 200px; height: 1px; margin: 14px auto 0;
+  background: linear-gradient(90deg, #0000, #c8a94e66, #0000);
+}
+
+/* тонкий скроллбар панелей */
+.overlay .panel { scrollbar-width: thin; scrollbar-color: #3d2f59 #0d0916; }
+.overlay .panel::-webkit-scrollbar { width: 8px; }
+.overlay .panel::-webkit-scrollbar-track { background: #0d0916; }
+.overlay .panel::-webkit-scrollbar-thumb { background: #3d2f59; border-radius: 4px; }
+
+/* пипсы чуть аккуратнее */
+.pip { border-radius: 2px; }
+.pip.on { box-shadow: 0 0 6px currentColor; }
+
+/* мобильные кнопки способностей: руны вместо пластика */
+#mobileDashBtn, #mobileUltBtn {
+  background: radial-gradient(circle at 32% 28%, #2c2144, #120b1e 75%);
+  box-shadow: 0 0 0 2px #000, 0 6px 16px #000b, inset 0 1px 0 #ffffff14;
+  border-width: 1.5px;
+}
+#mobileDashBtn { border-color: #8fa8d8; }
+#mobileUltBtn.ready { box-shadow: 0 0 20px #b657ff66, 0 0 0 2px #000, inset 0 1px 0 #ffffff14; }
+
+/* полосы HUD: тонкая световая кромка */
+#xpfill:after, #hpfill:after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: rgba(255,255,255,0.22);
+}
+#xpfill, #hpfill { position: relative; }
+
+/* бейджи карт */
+.cbadge, .card .cbad { background: #0a0612; box-shadow: 0 0 0 1px #000; letter-spacing: .08em; }
+
+/* кнопки-призраки с золотой искрой на тексте */
+.btn.ghost b { color: #eec95f; }
+
+/* ---------- диагностика ---------- */
+#nxBootFail {
+  position: fixed; left: 50%; top: 28%; transform: translate(-50%, 0); z-index: 99;
+  background: #1a1126; border: 1px solid #c8a94e; color: #e6dfd1;
+  padding: 24px 28px; border-radius: 10px; max-width: 440px;
+  font: 14px/1.6 Rubik, sans-serif; box-shadow: 0 20px 60px #000; text-align: center;
+}
+#nxBootFail b { color: #eec95f; }
+#nxErr {
+  position: fixed; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 60;
+  background: #2a0f14e6; border: 1px solid #ff4757aa; color: #ff9aa5;
+  padding: 6px 14px; border-radius: 6px; font: 600 11px Rubik, sans-serif;
+  opacity: 0; transition: opacity .4s; pointer-events: none; max-width: 90vw;
+  text-shadow: 1px 1px #000;
+}
+
+/* ============ UI-PASS 3: джус и Гримуар ============ */
+/* карты: 3D-tilt через переменные + burst при выборе */
+.card:hover {
+  transform: perspective(700px) translateY(-6px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) !important;
+}
+.card { will-change: transform; }
+.nx-burst { position: fixed; z-index: 40; pointer-events: none; }
+.nx-burst i {
+  position: absolute; width: 5px; height: 5px; border-radius: 1px;
+  transform: rotate(var(--a)) translateX(0);
+  animation: nxBurst .6s cubic-bezier(.1, .8, .3, 1) forwards;
+  box-shadow: 0 0 6px currentColor;
+}
+@keyframes nxBurst { to { transform: rotate(var(--a)) translateX(var(--d)); opacity: 0; } }
+
+/* SVG-иконки: единый размер в точках входа */
+.family-icon svg { width: 26px; height: 26px; }
+.cicon svg { width: 34px; height: 34px; }
+.sk svg { width: 24px; height: 24px; }
+.summon-entry b svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 2px; }
+.cicon { color: var(--ac); }
+.sk { color: #cfc4e0; }
+.sk.evo { color: #eec95f; }
+
+/* ---------- Гримуар: медальоны семейств ---------- */
+.family-card .family-icon {
+  width: 46px; height: 46px; border-radius: 10px; flex: 0 0 46px;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 32%, #241740, #0c0714 80%);
+  box-shadow: inset 0 0 12px #000c, 0 0 0 1px #000, 0 2px 8px #000a;
+  color: var(--family);
+}
+.family-card .family-icon:after { content: none; }
+.family-card { transition: transform .15s, box-shadow .15s, border-color .15s; }
+.family-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px #000b; }
+.family-card.locked .family-icon { filter: grayscale(.7) brightness(.7); }
+
+/* ---------- древо доктрин: состояния узлов ---------- */
+.doctrine-node { transition: transform .12s, box-shadow .12s, border-color .12s, background .2s; }
+.doctrine-node.bought {
+  border-color: #4f7a52;
+  background: linear-gradient(120deg, #142015, #171020 70%);
+  box-shadow: inset 0 0 14px #8dff5712, 0 0 0 1px #000;
+}
+.doctrine-node.bought .node-state { color: #8dff57; text-shadow: 0 0 8px #8dff57aa; }
+.doctrine-node.bought b { color: #cfe8c8; }
+.doctrine-node.capstone:not(.bought) { border-color: #7a5a2a; }
+.doctrine-node.capstone:not(.bought) .node-state { color: #eec95f; text-shadow: 0 0 8px #eec95f88; }
+.tree-edge.active { filter: drop-shadow(0 0 5px #8dff57aa); stroke: #8dff57; }
+
+/* ресурсные чипы гримуара */
+.legion-res { gap: 14px; background: #120d1d; box-shadow: inset 0 1px 0 #ffffff0d, 0 4px 12px #0009; }
+.legion-res b { text-shadow: 0 0 8px #ffd23f55; }
+
+/* вкладки с золотой искрой */
+.legion-tab.active, .branch-tab.active { text-shadow: 0 0 10px #ffd23f66; }
+
+/* заголовок гримуара: разделитель */
+.legion-head h1:after {
+  content: ""; display: block; width: 140px; height: 1px; margin-top: 8px;
+  background: linear-gradient(90deg, #c8a94e66, #0000);
+}
+
+/* стрелки-индикаторы целей за экраном (поверх виньетки) */
+#nxInd { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+.nx-ind {
+  position: fixed; left: 0; top: 0; width: 12px; height: 12px;
+  pointer-events: none; opacity: 0;
+  clip-path: polygon(100% 50%, 0 100%, 28% 50%, 0 0);
+  filter: drop-shadow(0 0 4px rgba(0,0,0,.9));
+  will-change: transform, opacity;
+}
+
+/* ============ КИНЕМАТОГРАФ ============ */
+.nx-lb {
+  position: fixed; left: 0; right: 0; height: 64px; background: #000;
+  z-index: 8; pointer-events: none;
+  transition: transform .45s cubic-bezier(.2, .8, .2, 1);
+}
+.nx-lb-t { top: 0; transform: translateY(-100%); }
+.nx-lb-b { bottom: 0; transform: translateY(100%); }
+.nx-lb.on { transform: translateY(0); }
+.nx-bossplate {
+  position: fixed; left: 50%; top: 17%; transform: translateX(-50%);
+  z-index: 9; pointer-events: none;
+  font: 900 clamp(20px, 4vw, 34px) Cinzel, serif; letter-spacing: 6px;
+  text-shadow: 0 0 26px currentColor, 2px 2px #000;
+  border-top: 1px solid; border-bottom: 1px solid;
+  padding: 10px 34px; background: rgba(5, 2, 8, .35);
+  animation: nxPlate 2.6s ease-out forwards;
+}
+@keyframes nxPlate {
+  0% { opacity: 0; letter-spacing: 14px; }
+  12% { opacity: 1; letter-spacing: 6px; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============ НАСТРОЙКИ ============ */
+.nx-set-row {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px; margin: 14px 0; font: 600 13px Rubik, sans-serif; color: #d9cfec;
+}
+.nx-set-row input[type=range] { width: 180px; accent-color: #e8b34a; }
+.nx-set-row input[type=checkbox] { width: 18px; height: 18px; accent-color: #e8b34a; }
