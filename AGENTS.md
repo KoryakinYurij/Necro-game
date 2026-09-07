@@ -4,9 +4,10 @@
 
 This repository follows the Matt Pocock engineering-skill workflow.
 
-Global skills are installed at `/home/fixedius/.agents/skills/`.
-Each skill lives at `/home/fixedius/.agents/skills/<skill-name>/SKILL.md`.
-When the correct workflow is unclear, read `/home/fixedius/.agents/skills/ask-matt/SKILL.md` before proposing the next step.
+Global skills live under the current machine's user-home `.agents/skills/` directory.
+On the VPS used for this project, that root is `/home/fixedius/.agents/skills/`.
+Each skill lives at `<global-skills-root>/<skill-name>/SKILL.md`.
+When the correct workflow is unclear, read `ask-matt/SKILL.md` under that root before proposing the next step.
 
 Treat skill files as process source of truth. This file routes to them; it does not duplicate them.
 
@@ -32,7 +33,7 @@ Before planning or implementation, read:
 - External or primary-source investigation → `/research`.
 - A design question needs something runnable/visible before deciding → `/prototype`; use `/handoff` when the prototype moves to another directory/harness.
 - Codebase-health or architecture survey → `/improve-codebase-architecture`; use `/codebase-design` for the shape of a chosen module/seam.
-- At a phase boundary, follow `/home/fixedius/.agents/skills/ask-matt/PHASE-BOUNDARIES.md` instead of compacting/clearing by habit.
+- At a phase boundary, follow `ask-matt/PHASE-BOUNDARIES.md` under the global skills root instead of compacting/clearing by habit.
 
 Do not send tickets produced by `/to-tickets` through `/triage`; they are already agent-ready.
 
