@@ -80,11 +80,12 @@ setTimeout(() => {
           return 1000 - G.P.hp;
         }
 
+        const dmgOpening = hitAt(10, 1);
         const dmgEarly = hitAt(30, 1);
         const dmgLate = hitAt(600, 1);
         const dmgHard = hitAt(600, 2);
-        console.log('damage samples:', { dmgEarly, dmgLate, dmgHard });
-        check('elapsed time не меняет фактический входящий урон', dmgEarly === dmgLate && dmgEarly > 0);
+        console.log('damage samples:', { dmgOpening, dmgEarly, dmgLate, dmgHard });
+        check('elapsed time 10/30/600 не меняет фактический входящий урон', dmgOpening === dmgEarly && dmgEarly === dmgLate && dmgEarly > 0);
         check('dedicated dmg scale меняет фактический входящий урон', dmgHard > dmgLate * 1.8);
         console.log('\nОшибки среды:', errors.length ? errors.slice(0, 5) : 'НЕТ');
         console.log('ИТОГ:', fails.length || errors.length ? 'FAIL' : 'EXPLORATION DIFFICULTY OK');

@@ -23,7 +23,7 @@ CORE = [
     # баланс: выживаемость
     ('if(n.dead||n.inv>0)return;n.inv=.35;', 'if(n.dead||n.inv>0)return;n.inv=.55;'),
     ('t=Math.max(1,Math.round(t-r)),n.hp-=t,',
-     't=Math.max(1,Math.round(t-r)),a.time<20&&(t=Math.max(1,Math.round(t*.6))),a.time-(n.hitGate||-9)<.5&&(t=Math.max(1,Math.round(t*.5))),n.hitGate=a.time,(()=>{let c=0;for(let m of a.minions)m.dead||c++;c>=5?t=Math.max(1,Math.round(t*.8)):c>=3&&(t=Math.max(1,Math.round(t*.9)))})(),n.hp-=t,'),
+     't=Math.max(1,Math.round(t-r)),(window.__nxOrchestrationMode||`arena`)===`arena`&&a.time<20&&(t=Math.max(1,Math.round(t*.6))),a.time-(n.hitGate||-9)<.5&&(t=Math.max(1,Math.round(t*.5))),n.hitGate=a.time,(()=>{let c=0;for(let m of a.minions)m.dead||c++;c>=5?t=Math.max(1,Math.round(t*.8)):c>=3&&(t=Math.max(1,Math.round(t*.9)))})(),n.hp-=t,'),
     # баланс: ульта
     ('(t?45:n?14:1.35)*r', '(t?45:n?14:.9)*r'),
     # перебросы
