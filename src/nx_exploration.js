@@ -13,6 +13,12 @@
   var LEASH_RADIUS = 520;
   var DELAYED_SPAWN_MS = 180;
   var SPAWN_RETRY_MS = 100;
+  var RUINS_CUE_RADIUS = 950;
+  var RUINS_REWARDS = [
+    { id: 'reaping_edge', name: 'КРОМКА ЖАТВЫ', desc: '+25% к урону оружия', apply: function (g) { g.B.dmg += 25; } },
+    { id: 'legion_teeth', name: 'ЗУБЫ ЛЕГИОНА', desc: '+25% к урону прислужников', apply: function (g) { g.B.mdmg += 25; } },
+    { id: 'ossuary_heart', name: 'СЕРДЦЕ ОССУАРИЯ', desc: '+40 максимального здоровья', apply: function (g) { g.B.hp += 40; } }
+  ];
   var ENCOUNTER_SLOTS = [
     { id: 'front-left', type: 'zom', dx: -36, dy: 18, delay: 0 },
     { id: 'front-right', type: 'zom', dx: 36, dy: 18, delay: 0 },
@@ -21,6 +27,7 @@
   var currentRun = null;
   var currentGame = null;
   var encounterStates = new WeakMap();
+  var poiStates = new WeakMap();
 
   function mix32(x) {
     x = (x ^ (x >>> 16)) >>> 0;
@@ -60,9 +67,13 @@
       x = Math.round(ax * AREA_SIZE + (rng() - .5) * AREA_SIZE * .45);
       y = Math.round(ay * AREA_SIZE + (rng() - .5) * AREA_SIZE * .45);
     }
+    var isStart = ax === 0 && ay === 0;
     return [{
       id: 'opportunity:' + ax + ':' + ay,
-      kind: 'opportunity', hostile: true, state: 'generated',
+      kind: isStart ? 'ruins' : 'opportunity',
+      poiType: isStart ? 'ruins' : null,
+      name: isStart ? 'РУИНЫ' : null,
+      hostile: true, state: 'generated',
       area: { x: ax, y: ay }, x: x, y: y
     }];
   }
@@ -83,12 +94,13 @@
     }
     var run = { seed: seed, visitArea: visitArea, snapshot: snapshot };
     encounterStates.set(run, new Map());
+    poiStates.set(run, new Map());
     return run;
   }
 
   function copyDescriptor(d) {
     return {
-      id: d.id, kind: d.kind, hostile: d.hostile, state: d.state,
+      id: d.id, kind: d.kind, poiType: d.poiType || null, name: d.name || null, hostile: d.hostile, state: d.state,
       area: { x: d.area.x, y: d.area.y }, x: d.x, y: d.y
     };
   }
@@ -234,6 +246,106 @@
     });
   }
 
+
+  function poiStateMap(run) {
+    var map = poiStates.get(run);
+    if (!map) { map = new Map(); poiStates.set(run, map); }
+    return map;
+  }
+
+  function mutablePoi(run, id) {
+    var descriptor = descriptorFor(run, id);
+    if (!descriptor || descriptor.poiType !== 'ruins') return null;
+    var map = poiStateMap(run);
+    if (!map.has(id)) map.set(id, {
+      id: id, type: 'ruins', status: 'guarded', claimedReward: null, claimCount: 0
+    });
+    return map.get(id);
+  }
+
+  function poiView(run, id) {
+    var state = mutablePoi(run, id);
+    if (!state) return null;
+    return {
+      id: state.id, type: state.type, status: state.status,
+      claimedReward: state.claimedReward, claimCount: state.claimCount
+    };
+  }
+
+  function ensureRuinsRewardUi() {
+    var root = document.getElementById('nxRuinsReward');
+    if (root) return root;
+    root = document.createElement('div');
+    root.id = 'nxRuinsReward';
+    root.className = 'nx-ruins-reward hidden';
+    root.innerHTML = '<div class="nx-ruins-panel">' +
+      '<div class="nx-ruins-kicker">МЕСТО СИЛЫ ЗАЧИЩЕНО</div>' +
+      '<h2>РУИНЫ ПОМНЯТ СИЛУ</h2>' +
+      '<p>Выбери один дар для этой экспедиции.</p>' +
+      '<div class="nx-ruins-choices"></div></div>';
+    var choices = root.querySelector('.nx-ruins-choices');
+    RUINS_REWARDS.forEach(function (reward) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'nx-ruins-choice';
+      button.setAttribute('data-ruins-reward', reward.id);
+      button.innerHTML = '<b>' + reward.name + '</b><span>' + reward.desc + '</span>';
+      button.addEventListener('click', function () {
+        if (root._poiId) claimRuins(currentRun, root._poiId, reward.id);
+      });
+      choices.appendChild(button);
+    });
+    document.body.appendChild(root);
+    return root;
+  }
+
+  function hideRuinsReward() {
+    var root = document.getElementById('nxRuinsReward');
+    if (!root) return;
+    root.classList.add('hidden');
+    root._poiId = null;
+  }
+
+  function showRuinsReward(id) {
+    var root = ensureRuinsRewardUi();
+    root._poiId = id;
+    root.classList.remove('hidden');
+  }
+
+  function rewardDef(id) {
+    for (var i = 0; i < RUINS_REWARDS.length; i++) if (RUINS_REWARDS[i].id === id) return RUINS_REWARDS[i];
+    return null;
+  }
+
+  function claimRuins(run, id, rewardId) {
+    if (!run || currentRun !== run || !N.G) return false;
+    var state = mutablePoi(run, id);
+    var reward = rewardDef(rewardId);
+    if (!state || state.status !== 'reward-ready' || !reward) return false;
+    reward.apply(N.G);
+    N.G.explorationRewards = N.G.explorationRewards || [];
+    N.G.explorationRewards.push({ poiId: id, rewardId: reward.id });
+    if (N.recalc) N.recalc();
+    state.claimedReward = reward.id;
+    state.claimCount += 1;
+    state.status = 'cleared';
+    hideRuinsReward();
+    return true;
+  }
+
+  function updatePois(run) {
+    if (!run) return;
+    run.snapshot().forEach(function (descriptor) {
+      if (descriptor.poiType !== 'ruins') return;
+      var poi = mutablePoi(run, descriptor.id);
+      var encounter = mutableEncounter(run, descriptor.id);
+      if (poi.status === 'guarded' && encounter && encounter.status === 'cleared') {
+        poi.status = 'reward-ready';
+        showRuinsReward(descriptor.id);
+      }
+    });
+  }
+
   function freshSeed() {
     var v = new Uint32Array(1);
     if (window.crypto && window.crypto.getRandomValues) {
@@ -248,6 +360,7 @@
     if (currentGame !== N.G) {
       currentGame = N.G;
       currentRun = createWorld(freshSeed());
+      hideRuinsReward();
       currentGame.explorationSeed = currentRun.seed;
       currentRun.visitArea(0, 0);
     }
@@ -261,6 +374,7 @@
     var ay = Math.round(N.G.P.y / AREA_SIZE);
     run.visitArea(ax, ay);
     updateEncounters(run, dt || 0);
+    updatePois(run);
   }
 
   function drawWorld(ctx) {
@@ -278,17 +392,44 @@
       var bdx = b.x - player.x, bdy = b.y - player.y;
       return adx * adx + ady * ady - (bdx * bdx + bdy * bdy);
     });
-    visible.slice(0, 1).forEach(function (d) {
-      var p = N.w2s(d.x, d.y);
+    var ruinsTarget = null;
+    for (var vi = 0; vi < visible.length; vi++) {
+      if (visible[vi].poiType !== 'ruins') continue;
+      var rv = poiView(run, visible[vi].id);
+      var rdx = player ? visible[vi].x - player.x : 0;
+      var rdy = player ? visible[vi].y - player.y : 0;
+      var nearby = !player || rdx * rdx + rdy * rdy <= RUINS_CUE_RADIUS * RUINS_CUE_RADIUS;
+      var rp = N.w2s(visible[vi].x, visible[vi].y);
+      var ruinsOnScreen = rp[0] >= 24 && rp[0] <= cam.w - 24 && rp[1] >= 24 && rp[1] <= cam.h - 24;
+      if (rv && ((rv.status !== 'cleared' && nearby) || (rv.status === 'cleared' && ruinsOnScreen))) ruinsTarget = visible[vi];
+      break;
+    }
+    var target = ruinsTarget;
+    if (!target) {
+      for (var gi = 0; gi < visible.length; gi++) if (visible[gi].poiType !== 'ruins') { target = visible[gi]; break; }
+    }
+    if (target) {
+      var p = N.w2s(target.x, target.y);
       var margin = 24;
+      var onScreen = p[0] >= margin && p[0] <= cam.w - margin && p[1] >= margin && p[1] <= cam.h - margin;
       var sx = Math.max(margin, Math.min(cam.w - margin, p[0]));
       var sy = Math.max(margin, Math.min(cam.h - margin, p[1]));
-      var encounter = encounterView(run, d.id);
-      var mark = encounter && encounter.status === 'cleared' ? '✓' : encounter && encounter.status === 'active' ? '✦' : '◆';
-      ctx.globalAlpha = .9;
-      ctx.fillStyle = encounter && encounter.status === 'cleared' ? '#8dff57' : encounter && encounter.status === 'active' ? '#ff4757' : '#ffd23f';
-      ctx.fillText(mark, sx, sy);
-    });
+      var encounter = encounterView(run, target.id);
+      var poi = target.poiType === 'ruins' ? poiView(run, target.id) : null;
+      if (!(poi && poi.status === 'cleared' && !onScreen)) {
+        var mark = poi ? (poi.status === 'cleared' ? '✓' : poi.status === 'reward-ready' ? '★' : encounter && encounter.status === 'active' ? '✦' : '⌂') :
+          encounter && encounter.status === 'cleared' ? '✓' : encounter && encounter.status === 'active' ? '✦' : '◆';
+        ctx.globalAlpha = .9;
+        ctx.fillStyle = poi && poi.status === 'cleared' ? '#8dff57' : poi && poi.status === 'reward-ready' ? '#ffd23f' : encounter && encounter.status === 'active' ? '#ff4757' : '#d9b35f';
+        ctx.fillText(mark, sx, sy);
+        if (poi && onScreen) {
+          ctx.globalAlpha = .75;
+          ctx.font = '700 10px Rubik, sans-serif';
+          ctx.fillText(poi.status === 'cleared' ? 'РУИНЫ · ЗАЧИЩЕНО' : 'РУИНЫ', sx, sy + 22);
+          ctx.font = '700 20px Rubik, sans-serif';
+        }
+      }
+    }
     ctx.globalAlpha = .55;
     ctx.textAlign = 'left';
     ctx.font = '600 10px Rubik, sans-serif';
@@ -310,6 +451,12 @@
     leashRadius: LEASH_RADIUS,
     delayedSpawnMs: DELAYED_SPAWN_MS,
     get: function (id) { var run = ensureRun(); return run ? encounterView(run, id) : null; }
+  };
+  X.pois = {
+    cueRadius: RUINS_CUE_RADIUS,
+    rewards: RUINS_REWARDS.map(function (r) { return { id: r.id, name: r.name, desc: r.desc }; }),
+    get: function (id) { var run = ensureRun(); return run ? poiView(run, id) : null; },
+    claim: function (id, rewardId) { var run = ensureRun(); return run ? claimRuins(run, id, rewardId) : false; }
   };
   X.setSimulationHook(simTick);
   X.setWorldRenderHook(drawWorld);

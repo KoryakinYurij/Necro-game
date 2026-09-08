@@ -88,7 +88,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const live = W.current();
   check('каждый Exploration run получает run seed', Number.isInteger(live.seed) && live.seed >= 0);
   check('run seed доступен в game/debug state', G.explorationSeed === live.seed && W.current().seed === live.seed);
-  check('world marker рисуется через supported render seam', window.__worldDrawText.includes('◆'));
+  check('world marker рисуется через supported render seam', window.__worldDrawText.some(t => t === '◆' || t === '⌂'));
   check('run seed видим в Exploration render', window.__worldDrawText.some(t => t === 'SEED ' + live.seed));
   const sizes = [[320, 240], [640, 360], [1440, 900]];
   let clampOk = true;
@@ -98,7 +98,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     window.__worldDrawCalls.length = 0;
     window.dispatchEvent(new window.Event('resize'));
     await wait(50);
-    const marks = window.__worldDrawCalls.filter(c => c.text === '◆');
+    const marks = window.__worldDrawCalls.filter(c => c.text === '◆' || c.text === '⌂');
     const mark = marks[marks.length - 1];
     clampOk = clampOk && !!mark && mark.x >= 24 && mark.x <= vw - 24 && mark.y >= 24 && mark.y <= vh - 24;
   }

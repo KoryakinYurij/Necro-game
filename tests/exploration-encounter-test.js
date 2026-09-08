@@ -140,6 +140,9 @@ function stepFor(N, seconds, dt = 0.03) {
   G.weapons.spear = { id: 'spear', lvl: 1, timer: 0 };
   G.lvls.spear = 1;
   for (const target of [...thirdWave]) {
+    thirdWave.filter(e => e !== target && !e.dead).forEach((e, i) => {
+      e.spd = 0; e.x = G.P.x - 420 - i * 50; e.y = G.P.y + 220;
+    });
     target.spd = 0; target.hp = 1;
     target.x = G.P.x + 105; target.y = G.P.y;
     G.weapons.spear.timer = 0;
@@ -149,7 +152,7 @@ function stepFor(N, seconds, dt = 0.03) {
   const cleared = E.get(id);
   check('cleared достигается только после active group defeated', cleared.status === 'cleared' && cleared.defeatedSlots.length === 3 && cleared.clearCount === 1);
   await wait(80);
-  check('Cleared имеет видимый completion marker', window.__encounterDrawText.includes('✓'));
+  check('Cleared Encounter имеет видимый completion/reward-ready marker', window.__encounterDrawText.some(t => t === '✓' || t === '★'));
 
   const activationAtClear = cleared.activation;
   const killsAtClear = G.kills;
