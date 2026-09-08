@@ -21,11 +21,13 @@ python3 tools/build.py
 # смоук Arena regression/control
 node tests/smoke-test.js
 
-# Exploration #2: adapter, isolation, legacy-meta isolation, time-independent difficulty
+# Exploration #2: adapter, boundaries, isolation, shared-core combat и time-independent difficulty
 node tests/exploration-adapter-test.js
+node tests/exploration-boundary-test.js
 node tests/exploration-isolation-test.js
 node tests/exploration-meta-isolation-test.js
 node tests/exploration-difficulty-test.js
+node tests/exploration-shared-core-test.js
 
 # «враждебное окружение»: без AudioContext, мёртвые обработчики, вырезанный основной скрипт
 node tests/boot-test.js
