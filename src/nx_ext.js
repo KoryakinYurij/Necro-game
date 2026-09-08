@@ -820,15 +820,17 @@
     });
     var mdb = $('modeBtn');
     if (mdb) mdb.addEventListener('click', function () {
-      var before = mdb.innerHTML;
+      // Capture the pre-click state before the legacy onclick runs. If that handler
+      // changes the mode, the fallback does nothing; if it is missing, recover once.
+      var before = N.meta.mode;
       setTimeout(function () {
-        if (mdb.innerHTML === before) {
+        if (N.meta.mode === before) {
           var d = N.meta;
           d.mode = d.mode === 'finale' ? 'endless' : 'finale';
           if (N.save) N.save();
           mdb.innerHTML = 'РЕЖИМ: <b>' + (d.mode === 'finale' ? 'ФИНАЛ 15 МИН' : 'БЕСКОНЕЧНЫЙ') + '</b>';
         }
       }, 40);
-    });
+    }, true);
   })();
 })();

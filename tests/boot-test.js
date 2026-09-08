@@ -43,14 +43,25 @@ setTimeout(async () => {
     const card = doc.querySelector('#cards .card'); if (card) card.click();
     await new Promise(r => setTimeout(r, 100));
 
-    // --- B. мёртвые оригинальные обработчики: дублёры ---
-    // legacy Arena submode + новый orchestration selector
+    // --- B. legacy Arena submode: normal handler + fallback must not double-toggle ---
     const modeBtn = doc.getElementById('modeBtn');
     const legacyBefore = N.meta.mode;
+    modeBtn.click();
+    await new Promise(r => setTimeout(r, 120));
+    check('обычная Arena-кнопка переключает finale/endless ровно один раз', N.meta.mode !== legacyBefore);
+    const selectedArenaMode = N.meta.mode;
+    N.startRun();
+    await new Promise(r => setTimeout(r, 120));
+    check('новый Arena run получает выбранный finale/endless', N.G && N.G.mode === selectedArenaMode);
+    const restartCard = doc.querySelector('#cards .card'); if (restartCard) restartCard.click();
+    await new Promise(r => setTimeout(r, 80));
+
+    // fallback остаётся рабочим, если основной onclick действительно отсутствует
+    const fallbackBefore = N.meta.mode;
     modeBtn.onclick = null;
     modeBtn.click();
     await new Promise(r => setTimeout(r, 120));
-    check('дублёр сохраняет переключение Arena finale/endless', N.meta.mode !== legacyBefore);
+    check('fallback переключает Arena finale/endless без onclick', N.meta.mode !== fallbackBefore);
     const explorationModeBtn = doc.getElementById('explorationModeBtn');
     const orchestrationBefore = N.exploration.mode;
     explorationModeBtn.click();
