@@ -5,8 +5,9 @@
 ## Зависимости (один раз)
 
 ```bash
-npm i --prefix tests jsdom canvas   # canvas нужен только tools/screenshot.js и boss-shots.js
-# если canvas не собирается (нет pixman/pkg-config): npm i --prefix tests jsdom — тесты работают без него
+npm ci --prefix tests
+# Для автоматических тестов нужен только jsdom; Canvas API стабится внутри harness.
+# Нативный пакет canvas не является prerequisite.
 ```
 
 (если папки `tests/node_modules` нет, скрипты также пробуют `/tmp/node_modules` — для песочницы)
@@ -17,8 +18,14 @@ npm i --prefix tests jsdom canvas   # canvas нужен только tools/scree
 # собрать игру из исходников (src/ + правки ядра) в корневой necro-v2.html
 python3 tools/build.py
 
-# смоук: 21 проверка (API, кузня душ, HUD ритуалов, старт забега)
+# смоук Arena regression/control
 node tests/smoke-test.js
+
+# Exploration #2: adapter, isolation, legacy-meta isolation, time-independent difficulty
+node tests/exploration-adapter-test.js
+node tests/exploration-isolation-test.js
+node tests/exploration-meta-isolation-test.js
+node tests/exploration-difficulty-test.js
 
 # «враждебное окружение»: без AudioContext, мёртвые обработчики, вырезанный основной скрипт
 node tests/boot-test.js
