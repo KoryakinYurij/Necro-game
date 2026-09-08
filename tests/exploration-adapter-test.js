@@ -55,6 +55,8 @@ setTimeout(() => {
     check('orchestration mode по умолчанию arena', X && X.mode === 'arena');
     check('adapter умеет менять mode', X && typeof X.setMode === 'function');
     check('adapter имеет simulation seam', X && typeof X.setSimulationHook === 'function');
+    check('adapter имеет explicit spawn', X && typeof X.spawn === 'function');
+    check('adapter имеет dedicated difficulty capability', X && typeof X.setDifficulty === 'function');
 
     if (!X) throw new Error('exploration adapter missing');
     let liveTicks = 0;
@@ -62,6 +64,16 @@ setTimeout(() => {
     X.setSimulationHook(() => { liveTicks++; });
     N.startRun();
     check('Exploration стартует без стартовой группы', N.G.enemies.length === 0);
+    const legacyP6 = N.P6;
+    const oldRandom = window.Math.random;
+    window.Math.random = () => 0.5;
+    X.setDifficulty({ hp: 1, dmg: 1 });
+    const low = X.spawn('zom', 10000, 10000);
+    X.setDifficulty({ hp: 2, dmg: 1.5 });
+    const high = X.spawn('zom', 10100, 10000);
+    window.Math.random = oldRandom;
+    check('spatial difficulty меняет HP через отдельный capability', high.maxhp > low.maxhp * 1.8);
+    check('difficulty capability не мутирует legacy P6 contract', N.P6 === legacyP6 && !!N.P6.waveT);
 
     const firstCard = window.document.querySelector('#cards .card');
     if (firstCard) firstCard.click();
