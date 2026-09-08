@@ -116,9 +116,15 @@ CORE = [
     # сочные цифры урона: pop-масштаб, центр, золотое свечение крита
     ('for(let e of a.nums){let t=1-e.t/.85,n=Z(e.x),r=Q(e.y);h.globalAlpha=Math.min(1,t*1.6),h.font=(e.big?`700 17px`:`700 13px`)+` Rubik, sans-serif`,h.strokeStyle=`rgba(0,0,0,0.85)`,h.lineWidth=3,h.strokeText(e.txt,n,r),h.fillStyle=e.col,h.fillText(e.txt,n,r),h.globalAlpha=1}',
      'if(window.__nxNums!==0)for(let e of a.nums){let t=1-e.t/.85,n=Z(e.x),r=Q(e.y),p=e.t<.16?1+(1-e.t/.16)*.6:1;h.save(),h.translate(n,r),h.scale(p,p),h.globalAlpha=Math.min(1,t*1.6),h.textAlign=`center`,e.big&&C(S.gold,0,2,16,t*.7),h.font=(e.big?`800 19px`:`700 13px`)+` Rubik, sans-serif`,h.strokeStyle=`rgba(0,0,0,0.85)`,h.lineWidth=3,h.strokeText(e.txt,0,0),h.fillStyle=e.col,h.fillText(e.txt,0,0),h.restore()}'),
-    # API расширения (дублёры кнопок, кузня, HUD ритуалов, gfx-подмены)
+    # Exploration #2: один simulation seam внутри живого sr (тот же путь использует test step)
+    ('sr=function(t){let n=a.P;',
+     'sr=function(t){(window.__nxOrchestrationMode||`arena`)===`exploration`&&typeof window.__nxExplorationSimHook===`function`&&window.__nxExplorationSimHook(t);let n=a.P;'),
+    # Exploration #2: legacy стартовая группа остаётся только у Arena control
+    ('for(let e=0;e<4;e++){let t=e*Math.PI/2+D(-.25,.25);H(`zom`,a.P.x+Math.cos(t)*240,a.P.y+Math.sin(t)*240)}mt(!0)',
+     'if((window.__nxOrchestrationMode||`arena`)===`arena`)for(let e=0;e<4;e++){let t=e*Math.PI/2+D(-.25,.25);H(`zom`,a.P.x+Math.cos(t)*240,a.P.y+Math.sin(t)*240)}mt(!0)'),
+    # API расширения + единый orchestration adapter (не переиспользует legacy d.mode/P6)
     ('castUlt:()=>Vr()}',
-     'castUlt:()=>Vr(),save:p,castSpell:Bn,refreshRes:Mn,renderMeta:X,pactDefs:We,relicDefs:He,evoDefs:Ne,specDefs:Ve,weaponDefs:je,isMuted:()=>le,toggleMute:ge,resume:()=>wt(),pause:()=>Ct(),refreshMenu:Rn,w2s:(e,t)=>[e-Wn+v,t-Gn+y],cam:()=>({w:g,h:_}),gfx:{enemy:e=>{er=e},hero:e=>{Zn=e},minion:e=>{Qn=e},golem:e=>{$n=e},floor:e=>{Yn=e},shadow:e=>{Kn=e}},icons:Be,families:Te,summons:Oe},window.castLegionSpell=Bn'),
+     'castUlt:()=>Vr(),save:p,castSpell:Bn,refreshRes:Mn,renderMeta:X,pactDefs:We,relicDefs:He,evoDefs:Ne,specDefs:Ve,weaponDefs:je,isMuted:()=>le,toggleMute:ge,resume:()=>wt(),pause:()=>Ct(),refreshMenu:Rn,w2s:(e,t)=>[e-Wn+v,t-Gn+y],cam:()=>({w:g,h:_}),gfx:{enemy:e=>{er=e},hero:e=>{Zn=e},minion:e=>{Qn=e},golem:e=>{$n=e},floor:e=>{Yn=e},shadow:e=>{Kn=e}},icons:Be,families:Te,summons:Oe,exploration:{get mode(){return window.__nxOrchestrationMode||`arena`},setMode:e=>{if(e!==`arena`&&e!==`exploration`)throw new Error(`invalid orchestration mode`);window.__nxOrchestrationMode=e},setSimulationHook:e=>{if(e!=null&&typeof e!==`function`)throw new TypeError(`simulation hook must be a function or null`);window.__nxExplorationSimHook=e}}},window.castLegionSpell=Bn'),
     # подсказка в меню
     ('Движение — <b>WASD</b> · рывок — <b>Пробел / Shift</b> · атака — <b>автоматически</b>',
      'Движение — <b>WASD</b> · рывок — <b>Пробел / Shift</b> · атака — <b>автоматически</b> · ритуалы — <b>Z X C V</b>'),
