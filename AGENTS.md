@@ -33,6 +33,7 @@ Before planning or implementation, read:
 - External or primary-source investigation → `/research`.
 - A design question needs something runnable/visible before deciding → `/prototype`; use `/handoff` when the prototype moves to another directory/harness.
 - Codebase-health or architecture survey → `/improve-codebase-architecture`; use `/codebase-design` for the shape of a chosen module/seam.
+- Agent-facing instructions or docs (`AGENTS.md`, `CLAUDE.md`, skills, context pointers) → `/writing-for-agents`.
 - At a phase boundary, follow `ask-matt/PHASE-BOUNDARIES.md` under the global skills root instead of compacting/clearing by habit.
 
 Do not send tickets produced by `/to-tickets` through `/triage`; they are already agent-ready.
