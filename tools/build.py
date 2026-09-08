@@ -29,7 +29,10 @@ CORE = [
     # перебросы
     ('rerollsLeft:0', 'rerollsLeft:1'),
     ('a.xp-=a.need,a.level++,a.need=be(a.level),a.queue++',
-     'a.xp-=a.need,a.level++,a.level%3==0&&a.rerollsLeft++,a.need=be(a.level),a.level>60?((a.lb=(a.lb||0)+1)%3||Cr(`apotheosis`)):a.queue++'),
+     'a.xp-=a.need,a.level++,a.level%3==0&&a.rerollsLeft++,a.need=be(a.level),a.level>60&&(window.__nxOrchestrationMode||`arena`)===`arena`?((a.lb=(a.lb||0)+1)%3||Cr(`apotheosis`)):a.queue++'),
+    # Exploration #2: initial draft must not underflow the normal level-up queue.
+    ('Ze();--a.queue>0?mt(!1):l(`play`)}}function vt(t)',
+     'Ze();((window.__nxOrchestrationMode||`arena`)===`exploration`?(a.queue=Math.max(0,a.queue-1)):--a.queue)>0?mt(!1):l(`play`)}}function vt(t)'),
     # режим по умолчанию: финал
     ('souls:0,mode:`endless`,legion:', 'souls:0,mode:`finale`,legion:'),
     # фикс L1: души начисляются в банк живьём при подборе, победа не должна удваивать

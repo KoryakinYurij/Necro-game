@@ -588,16 +588,27 @@
   }
 
   /* ---------- 4e. КИНЕМАТОГРАФ: letterbox, slow-mo, смена биома ---------- */
-  var lbTop = null, lbBot = null;
+  var lbTop = null, lbBot = null, lbTimer = null, bossSlowTimer = null;
   function lbInit() {
     lbTop = document.createElement('div'); lbTop.className = 'nx-lb nx-lb-t';
     lbBot = document.createElement('div'); lbBot.className = 'nx-lb nx-lb-b';
     document.body.appendChild(lbTop); document.body.appendChild(lbBot);
   }
+  function clearLetterbox() {
+    if (lbTimer) { clearTimeout(lbTimer); lbTimer = null; }
+    if (lbTop) { lbTop.classList.remove('on'); lbBot.classList.remove('on'); }
+  }
   function letterbox(ms) {
     if (!lbTop) lbInit();
+    clearLetterbox();
     lbTop.classList.add('on'); lbBot.classList.add('on');
-    setTimeout(function () { lbTop.classList.remove('on'); lbBot.classList.remove('on'); }, ms || 2200);
+    lbTimer = setTimeout(function () { clearLetterbox(); }, ms || 2200);
+  }
+  function clearCinematicState() {
+    clearLetterbox();
+    if (bossSlowTimer) { clearTimeout(bossSlowTimer); bossSlowTimer = null; }
+    window.__nxTS = 1;
+    document.querySelectorAll('.nx-bossplate').forEach(function (el) { el.remove(); });
   }
   function hex2rgb(hx) {
     return [parseInt(hx.slice(1, 3), 16), parseInt(hx.slice(3, 5), 16), parseInt(hx.slice(5, 7), 16)];
@@ -605,7 +616,10 @@
   var nxBiCur = -1, nxBiOld = 0, nxBiT = -99;
   function nxBiGrade(bi, t) {
     if (nxBiCur !== bi) {
-      if (nxBiCur >= 0) { nxBiOld = nxBiCur; nxBiT = t; letterbox(1600); }
+      if (nxBiCur >= 0) {
+        nxBiOld = nxBiCur; nxBiT = t;
+        if (!(N.exploration && N.exploration.mode === 'exploration')) letterbox(1600);
+      }
       nxBiCur = bi;
     }
     var u = nxBiT < 0 ? 1 : Math.min(1, (t - nxBiT) / 2);
@@ -618,8 +632,7 @@
   function nxCine(G, t) {
     if (!G) return;
     if (N.exploration && N.exploration.mode === 'exploration') {
-      window.__nxTS = 1;
-      document.querySelectorAll('.nx-bossplate').forEach(function (el) { el.remove(); });
+      clearCinematicState();
       return;
     }
     if (G.time < (nxCine.lastT || 0) - 1) nxBossSeen = {};
@@ -635,7 +648,8 @@
   function bossIntro(e) {
     letterbox(2400);
     window.__nxTS = 0.3;
-    setTimeout(function () { window.__nxTS = 1; }, 500);
+    if (bossSlowTimer) clearTimeout(bossSlowTimer);
+    bossSlowTimer = setTimeout(function () { window.__nxTS = 1; bossSlowTimer = null; }, 500);
     var np = document.createElement('div');
     np.className = 'nx-bossplate';
     np.style.borderColor = e.kc || '#ff4757';
