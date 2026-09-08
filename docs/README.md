@@ -29,6 +29,8 @@ Four review documents cover the arena→exploration pivot (they converge; do not
 - `REVIEW-exploration-gaps-deepdive.md` — executable mechanisms and test cases for the same seams.
 - `REVIEW-synthesis-2026-09-08.md` — synthesis, verified test-harness status, and the consolidated action order.
 
+For the 2026-09-08 Exploration work, GitHub #1/#2 supersede implementation recipes found in review documents. In particular, `__necro.P6` is the legacy timing/config contract, not the combat-difficulty configuration; Exploration must use the dedicated difficulty capability defined by #2. Review pseudocode is evidence/hypothesis, not executable scope.
+
 ## Open strategic decisions
 
 Large unresolved questions that need multiple sessions belong to a Wayfinder map and its decision tickets. When the map is clear, its decisions are collapsed into a new spec with `/to-spec` before implementation tickets are created.

@@ -1,5 +1,7 @@
 # Ревью проекта Necro-game: смена ядра (Arena → Exploration)
 
+> **Поправка 2026-09-08:** этот документ остаётся историческим анализом, но его конкретные рецепты через `__necro.P6` **заменены** актуальными spec/ticket #1/#2. Фактический getter `get P6(){return F}` возвращает legacy timing/config, тогда как combat difficulty использует `j`. Не переопределять `P6.hpTime/dmgTime/threatRate` и не считать «~2 точечных патча» подтверждённой архитектурой. Для Exploration нужен отдельный supported difficulty capability внутри единого адаптера, с проверенным порядком simulation-hook и mode-scoping. При противоречии исполняемым source of truth являются accepted ADRs и GitHub #1–#9.
+>
 > Обзор направления, реалистичности перехода и полноты учёта рисков.
 > Дата: 2026-09-08. Ревью проведено на сервере `regular-copper.ptr.network`,
 > проект `/home/fixedius/projects/Necro-game` (ветка `main`, HEAD `6fee330`).
