@@ -55,13 +55,21 @@ setTimeout(() => {
     check('orchestration mode по умолчанию arena', X && X.mode === 'arena');
     check('adapter умеет менять mode', X && typeof X.setMode === 'function');
     check('adapter имеет simulation seam', X && typeof X.setSimulationHook === 'function');
+    check('adapter имеет world render seam', X && typeof X.setWorldRenderHook === 'function');
     check('adapter имеет explicit spawn', X && typeof X.spawn === 'function');
     check('adapter имеет dedicated difficulty capability', X && typeof X.setDifficulty === 'function');
+    const modeBtn = window.document.getElementById('modeBtn');
+    check('единый selector показывает Arena', !!modeBtn && modeBtn.textContent.includes('АРЕНА'));
+    modeBtn && modeBtn.click();
+    check('selector выбирает Exploration', X && X.mode === 'exploration' && modeBtn.textContent.includes('ИССЛЕДОВАНИЕ'));
+    modeBtn && modeBtn.click();
+    check('selector возвращает Arena control', X && X.mode === 'arena' && modeBtn.textContent.includes('АРЕНА'));
 
     if (!X) throw new Error('exploration adapter missing');
-    let liveTicks = 0;
+    let liveTicks = 0, renderTicks = 0;
     X.setMode('exploration');
     X.setSimulationHook(() => { liveTicks++; });
+    if (X.setWorldRenderHook) X.setWorldRenderHook(() => { renderTicks++; });
     N.startRun();
     check('Exploration стартует без стартовой группы', N.G.enemies.length === 0);
     const legacyP6 = N.P6;
@@ -81,12 +89,14 @@ setTimeout(() => {
       try {
         check('Exploration перешёл в play', N.state === 'play');
         check('simulation seam вызывается живым game loop', liveTicks > 0);
+        check('world render seam вызывается существующим renderer', renderTicks > 0);
         const beforePause = liveTicks;
         N.pause();
         setTimeout(() => {
           try {
             check('pause останавливает simulation seam', liveTicks === beforePause);
             X.setSimulationHook(null);
+            if (X.setWorldRenderHook) X.setWorldRenderHook(null);
             X.setMode('arena');
             N.startRun();
             check('Arena control сохраняет стартовую группу', N.G.enemies.length === 4);

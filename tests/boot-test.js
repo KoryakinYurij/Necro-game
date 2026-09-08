@@ -46,11 +46,11 @@ setTimeout(async () => {
     // --- B. мёртвые оригинальные обработчики: дублёры ---
     // режим
     const modeBtn = doc.getElementById('modeBtn');
-    const modeBefore = N.meta.mode;
+    const modeBefore = N.exploration.mode;
     modeBtn.onclick = null;
     modeBtn.click();
     await new Promise(r => setTimeout(r, 120));
-    check('дублёр переключает режим', N.meta.mode !== modeBefore);
+    check('дублёр переключает orchestration mode', N.exploration.mode !== modeBefore);
 
     // пауза и резюме
     const pauseBtn = doc.getElementById('pauseBtn');

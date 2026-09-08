@@ -801,13 +801,10 @@
     });
     var mdb = $('modeBtn');
     if (mdb) mdb.addEventListener('click', function () {
-      var before = mdb.innerHTML;
+      var before = N.exploration && N.exploration.mode;
       setTimeout(function () {
-        if (mdb.innerHTML === before) {
-          var d = N.meta;
-          d.mode = d.mode === 'finale' ? 'endless' : 'finale';
-          if (N.save) N.save();
-          mdb.innerHTML = 'РЕЖИМ: <b>' + (d.mode === 'finale' ? 'ФИНАЛ 15 МИН' : 'БЕСКОНЕЧНЫЙ') + '</b>';
+        if (N.exploration && N.exploration.mode === before) {
+          N.exploration.setMode(before === 'exploration' ? 'arena' : 'exploration');
         }
       }, 40);
     });
