@@ -1398,6 +1398,7 @@ h1.title { animation: nxTitle 7s ease-in-out infinite; }
   var ACTIVATION_RADIUS = 180;
   var LEASH_RADIUS = 520;
   var DELAYED_SPAWN_MS = 180;
+  var SPAWN_RETRY_MS = 100;
   var ENCOUNTER_SLOTS = [
     { id: 'front-left', type: 'zom', dx: -36, dy: 18, delay: 0 },
     { id: 'front-right', type: 'zom', dx: 36, dy: 18, delay: 0 },
@@ -1527,7 +1528,11 @@ h1.title { animation: nxTitle 7s ease-in-out infinite; }
   }
 
   function queueEncounterSlot(run, descriptor, state, slot, activation) {
-    if (!slot.delay) return spawnEncounterSlot(run, descriptor, state, slot, activation);
+    if (!slot.delay) {
+      var enemy = spawnEncounterSlot(run, descriptor, state, slot, activation);
+      if (!enemy) state.pending.push({ slot: slot, left: SPAWN_RETRY_MS / 1000, activation: activation });
+      return enemy;
+    }
     state.pending.push({ slot: slot, left: slot.delay / 1000, activation: activation });
     return null;
   }
@@ -1538,8 +1543,12 @@ h1.title { animation: nxTitle 7s ease-in-out infinite; }
     state.pending.forEach(function (pending) {
       if (pending.activation !== state.activation) return;
       pending.left -= dt;
-      if (pending.left <= 0) spawnEncounterSlot(run, descriptor, state, pending.slot, pending.activation);
-      else keep.push(pending);
+      if (pending.left > 0) { keep.push(pending); return; }
+      var enemy = spawnEncounterSlot(run, descriptor, state, pending.slot, pending.activation);
+      if (!enemy) {
+        pending.left = SPAWN_RETRY_MS / 1000;
+        keep.push(pending);
+      }
     });
     state.pending = keep;
   }

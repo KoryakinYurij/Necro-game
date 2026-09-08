@@ -165,6 +165,35 @@ function stepFor(N, seconds, dt = 0.03) {
   check('Cleared Encounter терминален и не активируется повторно', afterReturn.status === 'cleared' && afterReturn.activation === activationAtClear && boundEnemies(G, id).length === 0);
   check('Cleared Encounter не создаёт повторных enemy payouts', G.kills === killsAtClear && G.soulsGained === soulsAtClear);
 
+  // A temporary delayed-slot spawn failure must recover inside the same activation.
+  N.startRun();
+  const recoveryCard = doc.querySelector('#cards .card'); if (recoveryCard) recoveryCard.click();
+  await wait(180);
+  const recoveryG = N.G;
+  recoveryG.weapons = {}; recoveryG.minions = [];
+  const recoveryDescriptor = W.current().snapshot()[0];
+  const recoveryId = recoveryDescriptor.id;
+  const recoverySpawn = X.spawn;
+  let rearBlocked = true;
+  X.spawn = function (type, x, y, affix) {
+    const isRear = Math.abs(x - recoveryDescriptor.x) < 1 && Math.abs(y - (recoveryDescriptor.y - 42)) < 1;
+    if (isRear && rearBlocked) return null;
+    return recoverySpawn(type, x, y, affix);
+  };
+  recoveryG.P.x = recoveryDescriptor.x; recoveryG.P.y = recoveryDescriptor.y;
+  N.step(0.05);
+  stepFor(N, (E.delayedSpawnMs + 120) / 1000);
+  check('temporary spawn failure оставляет Encounter active и missing slot не defeated', E.get(recoveryId).status === 'active' && E.get(recoveryId).defeatedSlots.length === 0 && boundEnemies(recoveryG, recoveryId).length === 2);
+  const recoveryActivation = E.get(recoveryId).activation;
+  rearBlocked = false;
+  stepFor(N, 0.5);
+  const recoveredWave = boundEnemies(recoveryG, recoveryId);
+  check('temporary spawn failure ретраится в той же activation', recoveredWave.length === 3 && E.get(recoveryId).activation === recoveryActivation);
+  recoveredWave.forEach(e => { e.dead = true; });
+  N.step(0.05);
+  check('Encounter после recovered spawn корректно завершается', E.get(recoveryId).status === 'cleared' && E.get(recoveryId).clearCount === 1);
+  X.spawn = recoverySpawn;
+
   // A failed spawn is not a clear: no visit/disengage/error path may fabricate completion.
   N.startRun();
   const failedRunCard = doc.querySelector('#cards .card'); if (failedRunCard) failedRunCard.click();
