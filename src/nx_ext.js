@@ -122,6 +122,7 @@
 
   function updHud() {
     requestAnimationFrame(updHud);
+    if (N.exploration && N.exploration.mode === 'exploration') { hud.style.display = 'none'; return; }
     var G = N.G, run = G && G.legion;
     hud.style.display = run ? 'flex' : 'none';
     if (!run) return;

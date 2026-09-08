@@ -116,6 +116,20 @@ CORE = [
     # сочные цифры урона: pop-масштаб, центр, золотое свечение крита
     ('for(let e of a.nums){let t=1-e.t/.85,n=Z(e.x),r=Q(e.y);h.globalAlpha=Math.min(1,t*1.6),h.font=(e.big?`700 17px`:`700 13px`)+` Rubik, sans-serif`,h.strokeStyle=`rgba(0,0,0,0.85)`,h.lineWidth=3,h.strokeText(e.txt,n,r),h.fillStyle=e.col,h.fillText(e.txt,n,r),h.globalAlpha=1}',
      'if(window.__nxNums!==0)for(let e of a.nums){let t=1-e.t/.85,n=Z(e.x),r=Q(e.y),p=e.t<.16?1+(1-e.t/.16)*.6:1;h.save(),h.translate(n,r),h.scale(p,p),h.globalAlpha=Math.min(1,t*1.6),h.textAlign=`center`,e.big&&C(S.gold,0,2,16,t*.7),h.font=(e.big?`800 19px`:`700 13px`)+` Rubik, sans-serif`,h.strokeStyle=`rgba(0,0,0,0.85)`,h.lineWidth=3,h.strokeText(e.txt,0,0),h.fillStyle=e.col,h.fillText(e.txt,0,0),h.restore()}'),
+    # Exploration #2: freeze legacy meta/progression effects inside Exploration
+    ('var bn=kt();Et(()=>{bn(),a&&(a.legion={doctrine:d.legion.doctrine,ash:0,deaths:0,resonance:0,specials:{},discovered:d.legion.discovered||{},mastery:d.legion.mastery||{},boneFusionUsed:!1,broodFusionUsed:!1,unlockedSummons:d.legion.unlockedSummons||{},buffs:{dmg:0},spells:{catalyst:0,secondBurial:0},bloodMarks:0,bloodPulseT:0},a.legionUnlocked=Object.keys(d.legion.unlocked),I(`ГРИМУАР ЛЕГИОНА`,`#8ef7c9`,`армия слышит волю некроманта`))});',
+     'var bn=kt();Et(()=>{bn(),a&&(a.legion={doctrine:(window.__nxOrchestrationMode||`arena`)===`arena`?d.legion.doctrine:null,ash:0,deaths:0,resonance:0,specials:{},discovered:(window.__nxOrchestrationMode||`arena`)===`arena`?(d.legion.discovered||{}):{},mastery:(window.__nxOrchestrationMode||`arena`)===`arena`?(d.legion.mastery||{}):{},boneFusionUsed:!1,broodFusionUsed:!1,unlockedSummons:(window.__nxOrchestrationMode||`arena`)===`arena`?(d.legion.unlockedSummons||{}):{},buffs:{dmg:0},spells:{catalyst:0,secondBurial:0},bloodMarks:0,bloodPulseT:0},a.legionUnlocked=(window.__nxOrchestrationMode||`arena`)===`arena`?Object.keys(d.legion.unlocked):[],(window.__nxOrchestrationMode||`arena`)===`arena`&&I(`ГРИМУАР ЛЕГИОНА`,`#8ef7c9`,`армия слышит волю некроманта`))});'),
+    ('var xn=At();Dt(()=>{if(xn(),!a||!a.legion)return;',
+     'var xn=At();Dt(()=>{if(xn(),!a||!a.legion||(window.__nxOrchestrationMode||`arena`)!==`arena`)return;'),
+    ('var Sn=un();ln(e=>{Sn(e),a&&a.legion&&(',
+     'var Sn=un();ln(e=>{Sn(e),a&&a.legion&&(window.__nxOrchestrationMode||`arena`)===`arena`&&('),
+    ('rn(t),It(t),zn(t),Gt(t);', 'rn(t),It(t),(window.__nxOrchestrationMode||`arena`)===`arena`&&zn(t),Gt(t);'),
+    ('function Bn(e){if(!a||!a.legion||a.legion.spellT>0)return!1;',
+     'function Bn(e){if((window.__nxOrchestrationMode||`arena`)!==`arena`||!a||!a.legion||a.legion.spellT>0)return!1;'),
+    ('if(i>0){a.soulsGained+=i,d.souls+=i;let t=e(`soulsVal`);',
+     'if(i>0){a.soulsGained+=i,(window.__nxOrchestrationMode||`arena`)===`arena`&&(d.souls+=i);let t=e(`soulsVal`);'),
+    ('i>0&&(a.soulsGained+=i,d.souls+=i),',
+     'i>0&&(a.soulsGained+=i,(window.__nxOrchestrationMode||`arena`)===`arena`&&(d.souls+=i)),'),
     # Exploration #2: Arena Director is mode-scoped; combat updates remain shared
     ('a.time>=a.nextMin){', '(window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextMin){'),
     ('if(a.time>=a.nextBoss){', 'if((window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextBoss){'),
