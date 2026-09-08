@@ -616,6 +616,11 @@
   var nxBossSeen = {};
   function nxCine(G, t) {
     if (!G) return;
+    if (N.exploration && N.exploration.mode === 'exploration') {
+      window.__nxTS = 1;
+      document.querySelectorAll('.nx-bossplate').forEach(function (el) { el.remove(); });
+      return;
+    }
     if (G.time < (nxCine.lastT || 0) - 1) nxBossSeen = {};
     nxCine.lastT = G.time;
     var en = G.enemies || [];

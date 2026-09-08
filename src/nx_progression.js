@@ -9,6 +9,7 @@
     'use strict';
     var N = window.__necro;
     if (!N) return;
+    function isExploration() { return !!(N.exploration && N.exploration.mode === 'exploration'); }
 
     var meta = N.meta;
     meta.legion = meta.legion || {};
@@ -326,6 +327,7 @@
     });
 
     function sacrifice() {
+        if (isExploration()) return false;
         var G = N.G;
         if (!G || N.state !== 'play' || sacCd > 0) return false;
         var m = null;
@@ -430,6 +432,7 @@
     /* ---------- главный поллинг ---------- */
     function tick() {
         requestAnimationFrame(tick);
+        if (isExploration()) { hud.style.display = 'none'; sacBtn.style.display = 'none'; return; }
         var G = N.G;
         var st = N.state;
         if (st === 'menu' || !G) { run = null; hud.style.display = 'none'; sacBtn.style.display = 'none'; return; }

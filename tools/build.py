@@ -116,6 +116,20 @@ CORE = [
     # сочные цифры урона: pop-масштаб, центр, золотое свечение крита
     ('for(let e of a.nums){let t=1-e.t/.85,n=Z(e.x),r=Q(e.y);h.globalAlpha=Math.min(1,t*1.6),h.font=(e.big?`700 17px`:`700 13px`)+` Rubik, sans-serif`,h.strokeStyle=`rgba(0,0,0,0.85)`,h.lineWidth=3,h.strokeText(e.txt,n,r),h.fillStyle=e.col,h.fillText(e.txt,n,r),h.globalAlpha=1}',
      'if(window.__nxNums!==0)for(let e of a.nums){let t=1-e.t/.85,n=Z(e.x),r=Q(e.y),p=e.t<.16?1+(1-e.t/.16)*.6:1;h.save(),h.translate(n,r),h.scale(p,p),h.globalAlpha=Math.min(1,t*1.6),h.textAlign=`center`,e.big&&C(S.gold,0,2,16,t*.7),h.font=(e.big?`800 19px`:`700 13px`)+` Rubik, sans-serif`,h.strokeStyle=`rgba(0,0,0,0.85)`,h.lineWidth=3,h.strokeText(e.txt,0,0),h.fillStyle=e.col,h.fillText(e.txt,0,0),h.restore()}'),
+    # Exploration #2: Arena Director is mode-scoped; combat updates remain shared
+    ('a.time>=a.nextMin){', '(window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextMin){'),
+    ('if(a.time>=a.nextBoss){', 'if((window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextBoss){'),
+    ('if(a.time>=a.nextWave&&', 'if((window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextWave&&'),
+    ('a.time>=a.nextElite&&', '(window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextElite&&'),
+    ('for(a.threat=(a.threat||0)+t*j.threatRate(r);a.threat>0&&a.enemies.length<i;){',
+     'for(a.threat=(window.__nxOrchestrationMode||`arena`)===`arena`?(a.threat||0)+t*j.threatRate(r):0;(window.__nxOrchestrationMode||`arena`)===`arena`&&a.threat>0&&a.enemies.length<i;){'),
+    ('a.phaseT-=e,a.phaseT<=0&&Or(),a.phase===`event`&&Nr(e),',
+     '(window.__nxOrchestrationMode||`arena`)===`arena`&&(a.phaseT-=e,a.phaseT<=0&&Or(),a.phase===`event`&&Nr(e)),'),
+    ('a.time>=a.nextPact&&!a.finaleSpawned', '(window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextPact&&!a.finaleSpawned'),
+    ('a.time>=a.nextApo', '(window.__nxOrchestrationMode||`arena`)===`arena`&&a.time>=a.nextApo'),
+    ('Fr(e),pr(e),Hr(e),xr(e),', 'Fr(e),pr(e),Hr(e),(window.__nxOrchestrationMode||`arena`)===`arena`&&xr(e),'),
+    ('ur(function(e){Yr(e),!(!a||i!==`play`||a.won||a.finaleSpawned)&&(a.biomeT+=e,a.biomeT>=180',
+     'ur(function(e){Yr(e),!(!a||i!==`play`||a.won||a.finaleSpawned||(window.__nxOrchestrationMode||`arena`)!==`arena`)&&(a.biomeT+=e,a.biomeT>=180'),
     # Exploration #2: dedicated combat difficulty capability; legacy j/P6 contracts untouched
     ('function St(){let e=a&&a.time?a.time/60:0,t=Math.min(j.powerScale.cap,xt()*j.powerScale.hp);return j.hpTime(e)*(1+t)}',
      'function St(){let e=a&&a.time?a.time/60:0,t=Math.min(j.powerScale.cap,xt()*j.powerScale.hp),n=(window.__nxOrchestrationMode||`arena`)===`exploration`?((window.__nxExplorationDifficulty&&window.__nxExplorationDifficulty.hp)||1):j.hpTime(e);return n*(1+t)}'),
