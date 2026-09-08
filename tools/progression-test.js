@@ -1,8 +1,9 @@
 /* Интеграционный тест progression-слоя: доктрины, испытания, печати, ачивки, благословения, кап уровня. */
 const fs = require('fs'), path = require('path');
 const { JSDOM } = require(require.resolve('jsdom', { paths: [path.join(__dirname, '..', 'tests')] }));
+const stubCanvas = require('../tests/jsdom-canvas-stub');
 const html = fs.readFileSync(path.join(__dirname, '..', 'necro-v2.html'), 'utf8');
-const dom = new JSDOM(html, { runScripts: 'dangerously', pretendToBeVisual: true, url: 'http://localhost/' });
+const dom = new JSDOM(html, { runScripts: 'dangerously', pretendToBeVisual: true, url: 'http://localhost/', beforeParse: stubCanvas });
 const { window } = dom; const doc = window.document;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 let fails = 0;

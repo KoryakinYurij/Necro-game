@@ -7,7 +7,7 @@
 ```bash
 npm ci --prefix tests
 # Для автоматических тестов нужен только jsdom; Canvas API стабится внутри harness.
-# Нативный пакет canvas не является prerequisite.
+# Нативный пакет canvas не является prerequisite для тестов; он optional и нужен только утилитам, которые реально рендерят PNG.
 ```
 
 (если папки `tests/node_modules` нет, скрипты также пробуют `/tmp/node_modules` — для песочницы)

@@ -1,12 +1,13 @@
 /* Аудит-прогон: 2 минуты живого геймплея (ext+gfx+core), сбор runtime-ошибок. */
 const fs = require('fs'), path = require('path');
 const { JSDOM, VirtualConsole } = require(require.resolve('jsdom', { paths: [path.join(__dirname, '..', 'tests')] }));
+const stubCanvas = require('../tests/jsdom-canvas-stub');
 const html = fs.readFileSync(path.join(__dirname, '..', 'necro-v2.html'), 'utf8');
 const errors = [];
 const vc = new VirtualConsole();
 vc.on('jsdomError', e => errors.push('jsdomError: ' + String(e.message).slice(0, 220)));
 vc.on('error', (...a) => errors.push('console.error: ' + a.join(' ').slice(0, 220)));
-const dom = new JSDOM(html, { runScripts: 'dangerously', pretendToBeVisual: true, url: 'http://localhost/', virtualConsole: vc });
+const dom = new JSDOM(html, { runScripts: 'dangerously', pretendToBeVisual: true, url: 'http://localhost/', virtualConsole: vc, beforeParse: stubCanvas });
 const { window } = dom; const doc = window.document;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
