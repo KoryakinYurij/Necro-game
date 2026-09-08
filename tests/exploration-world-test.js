@@ -13,6 +13,7 @@ const dom = new JSDOM(html, {
   virtualConsole: vc, beforeParse(window) {
     stubCanvas(window);
     window.__worldDrawText = [];
+    window.__worldDrawCalls = [];
     const spiedContexts = new WeakSet();
     const getContext = window.HTMLCanvasElement.prototype.getContext;
     window.HTMLCanvasElement.prototype.getContext = function (...args) {
@@ -21,6 +22,7 @@ const dom = new JSDOM(html, {
         const fillText = ctx.fillText;
         ctx.fillText = function (txt, ...rest) {
           if (window.__worldDrawText.length < 80) window.__worldDrawText.push(String(txt));
+          if (window.__worldDrawCalls.length < 160) window.__worldDrawCalls.push({ text: String(txt), x: rest[0], y: rest[1] });
           return fillText.call(this, txt, ...rest);
         };
         spiedContexts.add(ctx);
@@ -52,6 +54,15 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const a = W.describeArea(seed, 0, 0);
   const b = W.describeArea(seed, 0, 0);
   check('same seed + spatial identity детерминированы', JSON.stringify(a) === JSON.stringify(b));
+  const fixtureA = W.describeArea(0x12345678, 0, 0)[0];
+  const fixtureB = W.describeArea(0xdeadbeef, 0, 0)[0];
+  check('seed fixture A сохраняет стабильные поля', fixtureA.id === 'opportunity:0:0' && fixtureA.x === -282 && fixtureA.y === -562);
+  check('seed fixture B отличается и сохраняет стабильные поля', fixtureB.id === 'opportunity:0:0' && fixtureB.x === 297 && fixtureB.y === 460 && (fixtureB.x !== fixtureA.x || fixtureB.y !== fixtureA.y));
+  const isolated = W.create(seed);
+  const escaped = isolated.visitArea(0, 0);
+  escaped[0].x = 999999; escaped[0].area.x = 99; escaped[0].state = 'tampered';
+  const intact = isolated.visitArea(0, 0)[0];
+  check('мутация возвращённой копии не меняет cached descriptor', intact.x === fixtureA.x && intact.area.x === 0 && intact.state === 'generated');
 
   const s1 = W.create(seed);
   s1.visitArea(1, 0); s1.visitArea(0, 1); s1.visitArea(-1, 0);
@@ -79,8 +90,28 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   check('run seed доступен в game/debug state', G.explorationSeed === live.seed && W.current().seed === live.seed);
   check('world marker рисуется через supported render seam', window.__worldDrawText.includes('◆'));
   check('run seed видим в Exploration render', window.__worldDrawText.some(t => t === 'SEED ' + live.seed));
+  const sizes = [[320, 240], [640, 360], [1440, 900]];
+  let clampOk = true;
+  for (const [vw, vh] of sizes) {
+    Object.defineProperty(window, 'innerWidth', { value: vw, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: vh, configurable: true });
+    window.__worldDrawCalls.length = 0;
+    window.dispatchEvent(new window.Event('resize'));
+    await wait(50);
+    const marks = window.__worldDrawCalls.filter(c => c.text === '◆');
+    const mark = marks[marks.length - 1];
+    clampOk = clampOk && !!mark && mark.x >= 24 && mark.x <= vw - 24 && mark.y >= 24 && mark.y <= vh - 24;
+  }
+  check('edge-clamp держит marker внутри viewport разных размеров', clampOk);
   live.visitArea(0, 0); live.visitArea(1, 0);
   check('descriptors существуют без live enemy AI', G.enemies.length === enemiesBefore && live.snapshot().length >= 2);
+
+  const previousRun = live;
+  N.startRun();
+  const restartCard = doc.querySelector('#cards .card'); if (restartCard) restartCard.click();
+  await wait(180);
+  const restarted = W.current();
+  check('restart создаёт новый чистый world object', restarted !== previousRun && restarted.snapshot().length === 1 && !restarted.snapshot().some(d => d.id === 'opportunity:1:0'));
 
   console.log('\nОшибки среды:', errors.length ? errors.slice(0, 5) : 'НЕТ');
   console.log('ИТОГ:', fails.length || errors.length ? 'FAIL' : 'EXPLORATION WORLD OK');
