@@ -6,7 +6,15 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'necro-v2.html'), 'utf8'
 const errors=[];
 const vc = new VirtualConsole();
 vc.on('jsdomError', e => errors.push(String(e.message).slice(0,200)));
-const dom = new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc});
+const noop = () => {};
+function makeCtx(){ return new Proxy({}, {
+  get(t,k){ if(k in t)return t[k]; if(k==='createRadialGradient'||k==='createLinearGradient'||k==='createPattern')return()=>({addColorStop:noop}); if(k==='measureText')return()=>({width:10}); if(k==='getImageData')return()=>({data:new Uint8ClampedArray(4)}); return noop; },
+  set(t,k,v){ t[k]=v; return true; }
+}); }
+const dom = new JSDOM(html,{url:'http://localhost/',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(window){
+  window.HTMLCanvasElement.prototype.getContext=function(){ if(!this.__ctx)this.__ctx=makeCtx(); return this.__ctx; };
+  window.matchMedia=window.matchMedia||(()=>({matches:false,addListener:noop,removeListener:noop,addEventListener:noop,removeEventListener:noop}));
+}});
 const { window } = dom; const doc = window.document;
 const fails=[]; const check=(n,c)=>{console.log((c?'PASS':'FAIL')+' · '+n); if(!c)fails.push(n);};
 setTimeout(()=>{
@@ -37,10 +45,13 @@ setTimeout(()=>{
     setTimeout(()=>{
       check('неймплейт босса показан', !!doc.querySelector('.nx-bossplate') && doc.querySelector('.nx-bossplate').textContent.includes('ЛИХ'));
       check('letterbox включён', doc.querySelectorAll('.nx-lb.on').length === 2);
-      check('slow-mo активен или уже снят', window.__nxTS === 0.3 || window.__nxTS === 1);
-      console.log('ошибки:', errors.length ? errors : 'НЕТ');
-      console.log('ИТОГ:', fails.length===0 && errors.length===0 ? 'CINE OK' : 'ФЕЙЛЫ: '+fails.join(','));
-      process.exit(fails.length||errors.length?1:0);
-    }, 250);
+      check('slow-mo действительно включён', window.__nxTS === 0.3);
+      setTimeout(()=>{
+        check('slow-mo восстановлен', window.__nxTS === 1);
+        console.log('ошибки:', errors.length ? errors : 'НЕТ');
+        console.log('ИТОГ:', fails.length===0 && errors.length===0 ? 'CINE OK' : 'ФЕЙЛЫ: '+fails.join(','));
+        process.exit(fails.length||errors.length?1:0);
+      }, 520);
+    }, 100);
   }, 400);
 }, 700);
