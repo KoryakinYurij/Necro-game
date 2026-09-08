@@ -76,7 +76,7 @@ setTimeout(() => {
         G.kills = 24;
         G.ult = 100;
         X.setDifficulty({ hp: 0.01, dmg: 1 });
-        const elite = X.spawn('elite', G.P.x + 50, G.P.y);
+        const elite = X.spawn('elite', G.P.x + 50, G.P.y, 'fire');
         N.castUlt();
         check('контрольный elite убит через shared combat', elite.dead || elite.hp <= 0);
         check('Exploration kill не пишет legacy souls', M.souls === beforeMeta.souls);
