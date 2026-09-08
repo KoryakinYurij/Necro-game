@@ -29,6 +29,9 @@ node tests/exploration-meta-isolation-test.js
 node tests/exploration-difficulty-test.js
 node tests/exploration-shared-core-test.js
 
+# Exploration #3: seeded world, order-independence, safe start и visible first choice
+node tests/exploration-world-test.js
+
 # «враждебное окружение»: без AudioContext, мёртвые обработчики, вырезанный основной скрипт
 node tests/boot-test.js
 

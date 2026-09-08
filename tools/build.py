@@ -196,6 +196,7 @@ print('core multi edits:', len(CORE_MULTI))
 
 css = open(os.path.join(SRC, 'nx_style.css'), encoding='utf-8').read()
 ext = open(os.path.join(SRC, 'nx_ext.js'), encoding='utf-8').read()
+explore = open(os.path.join(SRC, 'nx_exploration.js'), encoding='utf-8').read()
 gfx = open(os.path.join(SRC, 'nx_gfx.js'), encoding='utf-8').read()
 prog = open(os.path.join(SRC, 'nx_progression.js'), encoding='utf-8').read()
 svgz = open(os.path.join(SRC, 'nx_svgzombie.js'), encoding='utf-8').read()
@@ -207,6 +208,7 @@ block = (
     '\n<style id="nxStyle">\n' + css + '\n</style>\n'
     '<div id="grainfx"></div>\n'
     '<script id="nxExt">\n' + ext + '\n</script>\n'
+    '<script id="nxExplore">\n' + explore + '\n</script>\n'
     '<script id="nxProg">\n' + prog + '\n</script>\n'
     '<script id="nxGfx">\n' + gfx + '\n</script>\n'
     '<script id="nxSvgData">window.__ZOMBIE_SVG = ' + _json.dumps(_svg) + ';</script>\n'
