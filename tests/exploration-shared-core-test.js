@@ -25,9 +25,14 @@ setTimeout(() => {
     const X = N.exploration;
     X.setMode('exploration');
     X.setDifficulty({ hp: 1, dmg: 1 });
+    const oldRandom = window.Math.random;
+    window.Math.random = () => 0;
     N.startRun();
-    const firstCard = window.document.querySelector('#cards .card');
-    if (firstCard) firstCard.click();
+    const warriorCard = [...window.document.querySelectorAll('#cards .card')]
+      .find(c => (c.querySelector('.cname')?.textContent || '').includes('Скелеты-воины'));
+    check('настоящий summon доступен через стартовый draft', !!warriorCard);
+    if (warriorCard) warriorCard.click();
+    window.Math.random = oldRandom;
 
     setTimeout(() => {
       try {
@@ -38,21 +43,37 @@ setTimeout(() => {
         window.dispatchEvent(new window.KeyboardEvent('keyup', { code: 'KeyD' }));
         check('movement update работает в Exploration', G.P.x > x0);
 
+        const summoned = G.minions.find(m => m.kind === 'warriors' && !m.dead);
+        check('draft реально создал shared-core миньона', !!summoned);
+
         G.enemies = [];
         G.projs = [];
+        if (summoned) { summoned.dead = true; summoned.resp = 999; }
         G.weapons.spear = { id: 'spear', lvl: 1, timer: 0 };
         G.lvls.spear = 1;
-        X.spawn('zom', G.P.x + 220, G.P.y, null);
+        const projectileTarget = X.spawn('zom', G.P.x + 180, G.P.y, null);
+        projectileTarget.spd = 0;
+        const projectileHp0 = projectileTarget.hp;
         N.step(0.05);
-        check('projectile update/spawn работает в Exploration', G.projs.length > 0);
+        check('weapon создаёт projectile в Exploration', G.projs.length > 0);
+        for (let i = 0; i < 30 && !projectileTarget.dead && projectileTarget.hp === projectileHp0; i++) N.step(0.02);
+        check('projectile → hit → enemy HP работает', projectileTarget.dead || projectileTarget.hp < projectileHp0);
 
-        G.minions = [{ kind: 'warriors', x: G.P.x - 120, y: G.P.y, hp: 100, maxhp: 100,
-          dmg: 10, spd: 120, cd: 0, dead: false, resp: 0, hitT: 0, slashT: 0,
-          slotAng: 0, ph: 0, face: 1, tilt: 0 }];
-        const mx0 = G.minions[0].x;
-        N.step(0.2);
-        check('summon/minion update работает в Exploration', G.minions[0].x !== mx0 || G.minions[0].slashT > 0);
-        check('shared damage state остаётся живым', G.P.hp > 0 && G.enemies.length > 0);
+        delete G.weapons.spear;
+        G.lvls.spear = 0;
+        G.enemies = [];
+        G.projs = [];
+        if (summoned) {
+          summoned.dead = false; summoned.resp = 0; summoned.cd = 0;
+          summoned.x = G.P.x + 120; summoned.y = G.P.y;
+          const minionTarget = X.spawn('zom', summoned.x + 24, summoned.y, null);
+          minionTarget.spd = 0; minionTarget.dmg = 0;
+          const minionHp0 = minionTarget.hp;
+          for (let i = 0; i < 30 && !minionTarget.dead && minionTarget.hp === minionHp0; i++) N.step(0.05);
+          check('настоящий summon → attack → enemy HP работает', minionTarget.dead || minionTarget.hp < minionHp0);
+        } else {
+          check('настоящий summon → attack → enemy HP работает', false);
+        }
         console.log('\nОшибки среды:', errors.length ? errors.slice(0, 5) : 'НЕТ');
         console.log('ИТОГ:', fails.length || errors.length ? 'FAIL' : 'EXPLORATION SHARED CORE OK');
         process.exit(fails.length || errors.length ? 1 : 0);
