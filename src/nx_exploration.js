@@ -28,6 +28,7 @@
   var currentGame = null;
   var encounterStates = new WeakMap();
   var poiStates = new WeakMap();
+  var rewardOpenQueued = null;
 
   function mix32(x) {
     x = (x ^ (x >>> 16)) >>> 0;
@@ -281,7 +282,7 @@
     root.innerHTML = '<div class="nx-ruins-panel">' +
       '<div class="nx-ruins-kicker">МЕСТО СИЛЫ ЗАЧИЩЕНО</div>' +
       '<h2>РУИНЫ ПОМНЯТ СИЛУ</h2>' +
-      '<p>Выбери один дар для этой экспедиции.</p>' +
+      '<p>Бой остановлен. Выбери один дар для этой экспедиции.</p>' +
       '<div class="nx-ruins-choices"></div></div>';
     var choices = root.querySelector('.nx-ruins-choices');
     RUINS_REWARDS.forEach(function (reward) {
@@ -291,25 +292,62 @@
       button.setAttribute('data-ruins-reward', reward.id);
       button.innerHTML = '<b>' + reward.name + '</b><span>' + reward.desc + '</span>';
       button.addEventListener('click', function () {
-        if (root._poiId) claimRuins(currentRun, root._poiId, reward.id);
+        if (root._poiId) claimRuins(root._run, root._game, root._poiId, reward.id);
       });
       choices.appendChild(button);
     });
+    window.addEventListener('keydown', function (event) {
+      if (root.classList.contains('hidden')) return;
+      if (event.code === 'Tab') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if ((event.code === 'Enter' || event.code === 'Space') && root.contains(document.activeElement) && document.activeElement.click) document.activeElement.click();
+    }, true);
     document.body.appendChild(root);
     return root;
   }
 
   function hideRuinsReward() {
+    rewardOpenQueued = null;
     var root = document.getElementById('nxRuinsReward');
     if (!root) return;
     root.classList.add('hidden');
     root._poiId = null;
+    root._run = null;
+    root._game = null;
+    root._pausedByRuins = false;
   }
 
-  function showRuinsReward(id) {
+  function invalidateRuinsReward() {
+    var root = document.getElementById('nxRuinsReward');
+    var resume = !!(root && !root.classList.contains('hidden') && root._pausedByRuins && root._game === N.G && N.state === 'pause');
+    hideRuinsReward();
+    if (resume) N.state = 'play';
+  }
+
+  function showRuinsReward(run, id) {
+    if (!run || currentRun !== run || !N.G || currentGame !== N.G || N.state !== 'play' || X.mode !== 'exploration') return false;
     var root = ensureRuinsRewardUi();
     root._poiId = id;
+    root._run = run;
+    root._game = N.G;
+    root._pausedByRuins = true;
     root.classList.remove('hidden');
+    N.state = 'pause';
+    return true;
+  }
+
+  function queueRuinsReward(run, id) {
+    if (rewardOpenQueued && rewardOpenQueued.run === run && rewardOpenQueued.id === id) return;
+    rewardOpenQueued = { run: run, id: id };
+    var open = function () {
+      var queued = rewardOpenQueued;
+      rewardOpenQueued = null;
+      if (!queued || queued.run !== run || queued.id !== id) return;
+      showRuinsReward(run, id);
+    };
+    if (typeof queueMicrotask === 'function') queueMicrotask(open);
+    else Promise.resolve().then(open);
   }
 
   function rewardDef(id) {
@@ -317,19 +355,22 @@
     return null;
   }
 
-  function claimRuins(run, id, rewardId) {
-    if (!run || currentRun !== run || !N.G) return false;
+  function claimRuins(run, game, id, rewardId) {
+    if (!run || currentRun !== run || !game || currentGame !== game || N.G !== game || X.mode !== 'exploration') return false;
     var state = mutablePoi(run, id);
     var reward = rewardDef(rewardId);
     if (!state || state.status !== 'reward-ready' || !reward) return false;
-    reward.apply(N.G);
-    N.G.explorationRewards = N.G.explorationRewards || [];
-    N.G.explorationRewards.push({ poiId: id, rewardId: reward.id });
+    reward.apply(game);
+    game.explorationRewards = game.explorationRewards || [];
+    game.explorationRewards.push({ poiId: id, rewardId: reward.id });
     if (N.recalc) N.recalc();
     state.claimedReward = reward.id;
     state.claimCount += 1;
     state.status = 'cleared';
+    var root = document.getElementById('nxRuinsReward');
+    var resume = !!(root && !root.classList.contains('hidden') && root._pausedByRuins && root._run === run && root._game === game && N.state === 'pause');
     hideRuinsReward();
+    if (resume) N.state = 'play';
     return true;
   }
 
@@ -339,10 +380,8 @@
       if (descriptor.poiType !== 'ruins') return;
       var poi = mutablePoi(run, descriptor.id);
       var encounter = mutableEncounter(run, descriptor.id);
-      if (poi.status === 'guarded' && encounter && encounter.status === 'cleared') {
-        poi.status = 'reward-ready';
-        showRuinsReward(descriptor.id);
-      }
+      if (poi.status === 'guarded' && encounter && encounter.status === 'cleared') poi.status = 'reward-ready';
+      if (poi.status === 'reward-ready' && N.state === 'play') queueRuinsReward(run, descriptor.id);
     });
   }
 
@@ -358,9 +397,9 @@
   function ensureRun() {
     if (X.mode !== 'exploration' || !N.G) return null;
     if (currentGame !== N.G) {
+      invalidateRuinsReward();
       currentGame = N.G;
       currentRun = createWorld(freshSeed());
-      hideRuinsReward();
       currentGame.explorationSeed = currentRun.seed;
       currentRun.visitArea(0, 0);
     }
@@ -456,7 +495,13 @@
     cueRadius: RUINS_CUE_RADIUS,
     rewards: RUINS_REWARDS.map(function (r) { return { id: r.id, name: r.name, desc: r.desc }; }),
     get: function (id) { var run = ensureRun(); return run ? poiView(run, id) : null; },
-    claim: function (id, rewardId) { var run = ensureRun(); return run ? claimRuins(run, id, rewardId) : false; }
+    claim: function (id, rewardId) { var run = ensureRun(); return run ? claimRuins(run, currentGame, id, rewardId) : false; }
+  };
+  var baseSetMode = X.setMode;
+  X.setMode = function (mode) {
+    var result = baseSetMode(mode);
+    if (mode !== 'exploration') invalidateRuinsReward();
+    return result;
   };
   X.setSimulationHook(simTick);
   X.setWorldRenderHook(drawWorld);

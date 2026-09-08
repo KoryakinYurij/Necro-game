@@ -35,8 +35,9 @@ node tests/exploration-world-test.js
 # Exploration #4: local Encounter lifecycle, disengage, stale activation guard и one-time clear
 node tests/exploration-encounter-test.js
 
-# Exploration #5: Ruins POI, limited cue, guard clear, run-local reward и idempotent claim
+# Exploration #5: Ruins POI, modal/XP lifecycle, stale-run guard и run-local rewards
 node tests/exploration-ruins-test.js
+node tests/exploration-ruins-rewards-test.js
 
 # «враждебное окружение»: без AudioContext, мёртвые обработчики, вырезанный основной скрипт
 node tests/boot-test.js
