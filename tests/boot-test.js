@@ -69,25 +69,35 @@ setTimeout(async () => {
     check('отдельный selector переключает orchestration mode', N.exploration.mode !== orchestrationBefore);
     explorationModeBtn.click();
 
-    // пауза и резюме
+    // пауза и резюме: штатный onclick не должен быть отменён fallback-слоем
     const pauseBtn = doc.getElementById('pauseBtn');
+    pauseBtn.click();
+    await new Promise(r => setTimeout(r, 120));
+    check('обычная pause-кнопка ставит паузу ровно один раз', N.state === 'pause');
+    const resumeBtn = doc.getElementById('resumeBtn');
+    resumeBtn.click();
+    await new Promise(r => setTimeout(r, 120));
+    check('обычная resume-кнопка снимает паузу', N.state === 'play');
     pauseBtn.onclick = null;
     pauseBtn.click();
     await new Promise(r => setTimeout(r, 120));
-    check('дублёр ставит паузу', N.state === 'pause');
-    const resumeBtn = doc.getElementById('resumeBtn');
+    check('fallback pause работает без onclick', N.state === 'pause');
     resumeBtn.onclick = null;
     resumeBtn.click();
     await new Promise(r => setTimeout(r, 120));
-    check('дублёр снимает паузу', N.state === 'play');
+    check('fallback resume работает без onclick', N.state === 'play');
 
-    // звук
+    // звук: штатный и fallback сценарии отдельно
     const muteBtn = doc.getElementById('muteBtn');
-    muteBtn.onclick = null;
-    const iconBefore = muteBtn.textContent;
+    const normalMuteBefore = muteBtn.textContent;
     muteBtn.click();
     await new Promise(r => setTimeout(r, 120));
-    check('дублёр переключает звук', muteBtn.textContent !== iconBefore);
+    check('обычная mute-кнопка переключает звук ровно один раз', muteBtn.textContent !== normalMuteBefore);
+    const fallbackMuteBefore = muteBtn.textContent;
+    muteBtn.onclick = null;
+    muteBtn.click();
+    await new Promise(r => setTimeout(r, 120));
+    check('fallback mute работает без onclick', muteBtn.textContent !== fallbackMuteBefore);
 
     // выход в меню с экрана смерти
     N.state = 'over';

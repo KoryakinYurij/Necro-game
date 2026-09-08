@@ -824,14 +824,14 @@
           else if (before === 'pause' && N.resume) N.resume();
         }
       }, 40);
-    });
+    }, true);
     var mb = $('muteBtn');
     if (mb) mb.addEventListener('click', function () {
       var before = mb.textContent;
       setTimeout(function () {
         if (mb.textContent === before && N.toggleMute) N.toggleMute();
       }, 40);
-    });
+    }, true);
     var mdb = $('modeBtn');
     if (mdb) mdb.addEventListener('click', function () {
       // Capture the pre-click state before the legacy onclick runs. If that handler
