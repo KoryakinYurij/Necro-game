@@ -44,13 +44,19 @@ setTimeout(async () => {
     await new Promise(r => setTimeout(r, 100));
 
     // --- B. мёртвые оригинальные обработчики: дублёры ---
-    // режим
+    // legacy Arena submode + новый orchestration selector
     const modeBtn = doc.getElementById('modeBtn');
-    const modeBefore = N.exploration.mode;
+    const legacyBefore = N.meta.mode;
     modeBtn.onclick = null;
     modeBtn.click();
     await new Promise(r => setTimeout(r, 120));
-    check('дублёр переключает orchestration mode', N.exploration.mode !== modeBefore);
+    check('дублёр сохраняет переключение Arena finale/endless', N.meta.mode !== legacyBefore);
+    const explorationModeBtn = doc.getElementById('explorationModeBtn');
+    const orchestrationBefore = N.exploration.mode;
+    explorationModeBtn.click();
+    await new Promise(r => setTimeout(r, 60));
+    check('отдельный selector переключает orchestration mode', N.exploration.mode !== orchestrationBefore);
+    explorationModeBtn.click();
 
     // пауза и резюме
     const pauseBtn = doc.getElementById('pauseBtn');

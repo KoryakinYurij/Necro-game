@@ -770,6 +770,25 @@
     N.state = 'menu';
     if (N.refreshMenu) { try { N.refreshMenu(); } catch (e) { } }
   }
+  (function setupExplorationModeSelector() {
+    if (!N.exploration || $('explorationModeBtn')) return;
+    var legacy = $('modeBtn');
+    if (!legacy || !legacy.parentNode) return;
+    var b = document.createElement('button');
+    b.id = 'explorationModeBtn';
+    b.className = 'btn ghost';
+    legacy.parentNode.insertBefore(b, legacy);
+    function sync() {
+      var mode = N.exploration.mode;
+      b.innerHTML = 'ОРКЕСТРАЦИЯ: <b>' + (mode === 'exploration' ? 'ИССЛЕДОВАНИЕ' : 'АРЕНА') + '</b>';
+      legacy.style.display = mode === 'exploration' ? 'none' : '';
+    }
+    b.addEventListener('click', function () {
+      N.exploration.setMode(N.exploration.mode === 'exploration' ? 'arena' : 'exploration');
+      sync();
+    });
+    sync();
+  })();
   guard('startBtn', function () { if (N.state === 'menu') N.startRun(); });
   guard('restartBtn1', function () { if (N.state === 'pause' || N.state === 'menu') N.startRun(); });
   guard('restartBtn2', function () { if (N.state === 'over') N.startRun(); });
@@ -801,10 +820,13 @@
     });
     var mdb = $('modeBtn');
     if (mdb) mdb.addEventListener('click', function () {
-      var before = N.exploration && N.exploration.mode;
+      var before = mdb.innerHTML;
       setTimeout(function () {
-        if (N.exploration && N.exploration.mode === before) {
-          N.exploration.setMode(before === 'exploration' ? 'arena' : 'exploration');
+        if (mdb.innerHTML === before) {
+          var d = N.meta;
+          d.mode = d.mode === 'finale' ? 'endless' : 'finale';
+          if (N.save) N.save();
+          mdb.innerHTML = 'РЕЖИМ: <b>' + (d.mode === 'finale' ? 'ФИНАЛ 15 МИН' : 'БЕСКОНЕЧНЫЙ') + '</b>';
         }
       }, 40);
     });

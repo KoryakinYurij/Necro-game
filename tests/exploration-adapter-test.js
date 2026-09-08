@@ -59,11 +59,14 @@ setTimeout(() => {
     check('adapter имеет explicit spawn', X && typeof X.spawn === 'function');
     check('adapter имеет dedicated difficulty capability', X && typeof X.setDifficulty === 'function');
     const modeBtn = window.document.getElementById('modeBtn');
-    check('единый selector показывает Arena', !!modeBtn && modeBtn.textContent.includes('АРЕНА'));
-    modeBtn && modeBtn.click();
-    check('selector выбирает Exploration', X && X.mode === 'exploration' && modeBtn.textContent.includes('ИССЛЕДОВАНИЕ'));
-    modeBtn && modeBtn.click();
-    check('selector возвращает Arena control', X && X.mode === 'arena' && modeBtn.textContent.includes('АРЕНА'));
+    const explorationModeBtn = window.document.getElementById('explorationModeBtn');
+    check('отдельный selector показывает Arena', !!explorationModeBtn && explorationModeBtn.textContent.includes('АРЕНА'));
+    check('legacy finale/endless control сохранён в Arena', !!modeBtn && modeBtn.style.display !== 'none');
+    explorationModeBtn && explorationModeBtn.click();
+    check('selector выбирает Exploration', X && X.mode === 'exploration' && explorationModeBtn.textContent.includes('ИССЛЕДОВАНИЕ'));
+    check('legacy mode control скрыт в Exploration', modeBtn && modeBtn.style.display === 'none');
+    explorationModeBtn && explorationModeBtn.click();
+    check('selector возвращает Arena control', X && X.mode === 'arena' && explorationModeBtn.textContent.includes('АРЕНА') && modeBtn.style.display !== 'none');
 
     if (!X) throw new Error('exploration adapter missing');
     let liveTicks = 0, renderTicks = 0;
